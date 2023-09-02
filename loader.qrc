@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="loadSpinner">
+    <file>images/rollingSpinner.gif</file>
+    <file>images/eclipseSpinner.gif</file>
+    <file>images/loadSpinner.gif</file>
+  </qresource>
+</RCC>
