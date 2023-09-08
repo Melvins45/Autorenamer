@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icon">
+    <file>images/ok.png</file>
     <file>images/icon_2 - Copie - Copie.png</file>
     <file>images/icon_2 - Copie.png</file>
   </qresource>

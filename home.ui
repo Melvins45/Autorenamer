@@ -113,7 +113,7 @@
               </property>
               <property name="font">
                <font>
-                <pointsize>16</pointsize>
+                <pointsize>12</pointsize>
                </font>
               </property>
               <property name="styleSheet">
@@ -297,6 +297,7 @@ color: rgb(217, 217, 217);font-style: italic;</string>
      <string>Fichier</string>
     </property>
     <addaction name="actionParcourir"/>
+    <addaction name="actionQuitter"/>
    </widget>
    <widget class="QMenu" name="menuRenommer">
     <property name="title">
@@ -340,7 +341,12 @@ color: rgb(217, 217, 217);font-style: italic;</string>
   </action>
   <action name="actionTout_Renommer">
    <property name="text">
-    <string>Tout Renommer</string>
+    <string>Tout Renommer         Ctrl+F2</string>
+   </property>
+  </action>
+  <action name="actionQuitter">
+   <property name="text">
+    <string>Quitter</string>
    </property>
   </action>
  </widget>

@@ -34,6 +34,8 @@ class Ui_Autorenamer(object):
         self.actionRenommer.setObjectName(u"actionRenommer")
         self.actionTout_Renommer = QAction(Autorenamer)
         self.actionTout_Renommer.setObjectName(u"actionTout_Renommer")
+        self.actionQuitter = QAction(Autorenamer)
+        self.actionQuitter.setObjectName(u"actionQuitter")
         self.centralwidget = QWidget(Autorenamer)
         self.centralwidget.setObjectName(u"centralwidget")
         self.centralwidget.setStyleSheet(u"background-color: rgb(255, 255, 255);")
@@ -74,7 +76,7 @@ class Ui_Autorenamer(object):
         sizePolicy.setHeightForWidth(self.folderNameEdit.sizePolicy().hasHeightForWidth())
         self.folderNameEdit.setSizePolicy(sizePolicy)
         font1 = QFont()
-        font1.setPointSize(16)
+        font1.setPointSize(12)
         self.folderNameEdit.setFont(font1)
         self.folderNameEdit.setStyleSheet(u"border: none;\n"
 "background-color: rgb(217, 217, 217);\n"
@@ -91,7 +93,9 @@ class Ui_Autorenamer(object):
         self.parcourirButton.setObjectName(u"parcourirButton")
         sizePolicy.setHeightForWidth(self.parcourirButton.sizePolicy().hasHeightForWidth())
         self.parcourirButton.setSizePolicy(sizePolicy)
-        self.parcourirButton.setFont(font1)
+        font2 = QFont()
+        font2.setPointSize(16)
+        self.parcourirButton.setFont(font2)
         self.parcourirButton.setLayoutDirection(Qt.RightToLeft)
         self.parcourirButton.setStyleSheet(u"border: none;\n"
 "background-color: rgb(241, 241, 241);\n"
@@ -105,7 +109,7 @@ class Ui_Autorenamer(object):
         self.parcourirButton2.setObjectName(u"parcourirButton2")
         sizePolicy.setHeightForWidth(self.parcourirButton2.sizePolicy().hasHeightForWidth())
         self.parcourirButton2.setSizePolicy(sizePolicy)
-        self.parcourirButton2.setFont(font1)
+        self.parcourirButton2.setFont(font2)
         self.parcourirButton2.setLayoutDirection(Qt.RightToLeft)
         self.parcourirButton2.setStyleSheet(u"border: none;\n"
 "background-color: rgb(241, 241, 241);\n"
@@ -129,7 +133,7 @@ class Ui_Autorenamer(object):
         self.renameAllCategoriesButton.setObjectName(u"renameAllCategoriesButton")
         sizePolicy.setHeightForWidth(self.renameAllCategoriesButton.sizePolicy().hasHeightForWidth())
         self.renameAllCategoriesButton.setSizePolicy(sizePolicy)
-        self.renameAllCategoriesButton.setFont(font1)
+        self.renameAllCategoriesButton.setFont(font2)
         self.renameAllCategoriesButton.setStyleSheet(u"border-radius: 17%;\n"
 "background-color: rgb(241, 241, 241);\n"
 "margin-left: 125%;\n"
@@ -170,11 +174,11 @@ class Ui_Autorenamer(object):
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.noFileFound = QLabel(self.emptySearch)
         self.noFileFound.setObjectName(u"noFileFound")
-        font2 = QFont()
-        font2.setFamily(u"MS Shell Dlg 2")
-        font2.setPointSize(16)
-        font2.setItalic(True)
-        self.noFileFound.setFont(font2)
+        font3 = QFont()
+        font3.setFamily(u"MS Shell Dlg 2")
+        font3.setPointSize(16)
+        font3.setItalic(True)
+        self.noFileFound.setFont(font3)
         self.noFileFound.setStyleSheet(u"border: none;\n"
 "color: rgb(217, 217, 217);font-style: italic;")
         self.noFileFound.setAlignment(Qt.AlignCenter)
@@ -207,6 +211,7 @@ class Ui_Autorenamer(object):
         self.menubar.addAction(self.menuFichier.menuAction())
         self.menubar.addAction(self.menuRenommer.menuAction())
         self.menuFichier.addAction(self.actionParcourir)
+        self.menuFichier.addAction(self.actionQuitter)
         self.menuRenommer.addAction(self.actionTout_Rafra_chir)
         self.menuRenommer.addAction(self.actionTout_Renommer)
 
@@ -223,7 +228,8 @@ class Ui_Autorenamer(object):
         self.actionRafra_chir.setText(QCoreApplication.translate("Autorenamer", u"Rafra\u00eechir", None))
         self.actionTout_Rafra_chir.setText(QCoreApplication.translate("Autorenamer", u"Tout Rafra\u00eechir", None))
         self.actionRenommer.setText(QCoreApplication.translate("Autorenamer", u"Renommer", None))
-        self.actionTout_Renommer.setText(QCoreApplication.translate("Autorenamer", u"Tout Renommer", None))
+        self.actionTout_Renommer.setText(QCoreApplication.translate("Autorenamer", u"Tout Renommer         Ctrl+F2", None))
+        self.actionQuitter.setText(QCoreApplication.translate("Autorenamer", u"Quitter", None))
         self.folderName.setText(QCoreApplication.translate("Autorenamer", u"Nom du dossier", None))
         self.parcourirButton.setText(QCoreApplication.translate("Autorenamer", u"Parcourir", None))
         self.parcourirButton2.setText("")

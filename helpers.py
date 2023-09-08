@@ -1,10 +1,11 @@
 import sys
 import os
 from PySide2.QtWidgets import *
-from PySide2.QtCore import (QFile, QIODevice)
+from PySide2.QtCore import (QFile, QIODevice, Signal)
 from PySide2.QtUiTools import QUiLoader
 import constants as gc
 import re
+import threading
     
 def load_ui(file_name:str) -> QWidget:
     """Load an ui file in a QWidget and return it
@@ -53,18 +54,75 @@ def load_py(file_name:str) -> QWidget:
                 self.m_ui.setupUi(self)
         return _Window()
     
-def clear_layout(layout: QVBoxLayout):
-    """Clear a layout of all its childrean
+def autoWrap(_text: str, _inlineCharactersSize: int) -> str :
+    """Transform a string in a multiline string according to the inline size
 
     Args:
-        layout (QVBoxLayout): The layout to clear
+        _text (str): The string to transform
+        _inlineCharactersSize (int): The inline size
+
+    Returns:
+        str: The multiline string transformed
     """
-    for i in reversed(range(layout.count())): 
-        widgetToRemove = layout.itemAt(i).widget()
-        # remove it from the layout list
-        layout.removeWidget(widgetToRemove)
-        # remove it from the gui
-        widgetToRemove.setParent(None)   
+    return "".join([ _text[i] if i == 0 else _text[i] if i%_inlineCharactersSize != 0 else _text[i]+'\n' for i in range(len(_text)) ])    
+    
+# def remove_from_widget(_widget : QWidget) :
+    
+    
+def remove_from_layout(layout: QLayout, _index: int):
+    """Remove a widget from his layout
+
+    Args:
+        layout (QLayout): The layout from which we remove 
+        _index (int): The index of the widget to remove
+    """
+    widgetToRemove = layout.itemAt(_index).widget()
+    # remove it from the layout list
+    layout.removeWidget(widgetToRemove)
+    # remove it from the gui
+    widgetToRemove.setParent(None)
+    
+def clear_layout(_layout: QLayout, _listToLeave: list[int] = []):
+    """Clear a layout of all its children
+
+    Args:
+        _layout (QLayout): The layout to clear
+        _listToLeave (list[int]): The list of index to leave
+    """
+    lenght = _layout.count()
+    # print( [ [i, type(_layout.itemAt(i).widget())] if i > 0 else [i, _layout.itemAt(i).widget().objectName()] for i in range(lenght) ] )
+    # print( [ [i, type(_layout.itemAt(i).widget())] if _layout.itemAt(i).widget() == None else [i, _layout.itemAt(i).widget().objectName()] for i in range(lenght) ] )
+    # print( type(type(lenght)) )
+    # print( [ [i, type(_layout.itemAt(i).widget())] for i in range(lenght) ] ) # if type(_layout.itemAt(i).widget()) == None else [i, _layout.itemAt(i).widget().objectName()] for i in range(lenght) ] )
+    for i in range(lenght) : # reversed(range(lenght)): 
+        # print(i, type(_layout.itemAt(i).widget()))
+        if i not in _listToLeave :
+            # print(i," to remove ")
+            widgetToRemove = _layout.itemAt(i).widget()
+            # remove it from the layout list
+            _layout.removeWidget(widgetToRemove)
+            # remove it from the gui
+            if widgetToRemove != None :
+                widgetToRemove.setParent(None)   
+
+def reconnect(signal, newhandler = None, oldhandler = None):
+    """Connect a new slot to a signal after disconnecting others
+
+    Args:
+        signal (_type_): The signal to connect to
+        newhandler (function, optional): The new slot to connect. Defaults to None.
+        oldhandler (function, optional): The old slot to connect. Defaults to None.
+    """    
+    try:
+        if oldhandler is not None:
+            while True:
+                signal.disconnect(oldhandler)
+        else:
+            signal.disconnect()
+    except Exception:
+        pass
+    if newhandler is not None:
+        signal.connect(newhandler)
 
 def escape_behind(_str_to_escape: str, _str: str) -> str :
     """Get the characters before specified characters within a string
@@ -114,13 +172,14 @@ def get_name_from_object(_file_object: dict) -> str :
     Returns:
         str: The resulted name
     """
-    return f"{_file_object['name']} S{_file_object['season']:02} EP{_file_object['episode']:02}{ ' '+str(_file_object['year']) if _file_object['year'] != None else ''}{ ' '+str(_file_object['type']) if _file_object['type'] != None else ''}{_file_object['extension']}"    
+    return f"{_file_object['name']} S{_file_object['season']:02} EP{_file_object['episode']:02}{ ' '+str(_file_object['year']) if _file_object['year'] != None else ''}{ ' '+str(_file_object['type']).upper() if _file_object['type'] != None else ''}{_file_object['extension']}"    
 
-def get_episode_object(_file_name: str) -> dict[str:any] :
+def get_episode_object(_file_name: str, general: bool = False) -> dict[str:any] :
     """Construct and send an episode object from the file's name 
 
     Args:
         _file_name (str): The file name to compile
+        general (bool) (Default to False): A bool to specify if the file name is a category name
 
     Returns:
         dict[str:any]: The resulted episode object
@@ -153,7 +212,7 @@ def get_episode_object(_file_name: str) -> dict[str:any] :
 
     return {
         "name" : rowysy1,
-        "season" : 1 if len(nums1) <= 1 else nums1[0],
+        "season" : 0 if len(nums1) == 0 else 1 if len(nums1) == 1 and not general else nums1[0],
         "episode" : nums1[0] if len(nums1) == 1 else nums1[1] if len(nums1) != 0 else 1,
         "nums1" : nums1,
         "year" : None if len(year) == 0 else year[0], 
@@ -161,7 +220,7 @@ def get_episode_object(_file_name: str) -> dict[str:any] :
         "original" : _file_name,
         "final" : get_name_from_object({
             "name" : rowysy1,
-            "season" : 1 if len(nums1) <= 1 else nums1[0],
+            "season" : 0 if len(nums1) == 0 else 1 if len(nums1) == 1 and not general else nums1[0],
             "episode" : nums1[0] if len(nums1) == 1 else nums1[1] if len(nums1) != 0 else 1,
             "nums1" : nums1,
             "year" : None if len(year) == 0 else year[0], 
@@ -171,3 +230,17 @@ def get_episode_object(_file_name: str) -> dict[str:any] :
         } ),
         "extension" : _str_escaped
     } 
+    
+def set_timeout(func, sec: int) -> threading.Timer:
+    """Set timeout before executing a function
+
+    Args:
+        func (function): The function to execute
+        sec (int): The seconds to wait before execution
+    """     
+    def func_wrapper():
+        # set_interval(func, sec)
+        func()
+    t = threading.Timer(sec, func_wrapper)
+    t.start()
+    return t

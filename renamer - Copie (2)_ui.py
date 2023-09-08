@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'renamer.ui'
+## Form generated from reading UI file 'renamer - Copie (2).ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.2
 ##
@@ -19,7 +19,7 @@ class Ui_home(object):
     def setupUi(self, home):
         if not home.objectName():
             home.setObjectName(u"home")
-        home.resize(909, 571)
+        home.resize(909, 541)
         icon = QIcon()
         icon.addFile(u":/newPrefix/template_icon.png", QSize(), QIcon.Normal, QIcon.Off)
         home.setWindowIcon(icon)
@@ -33,7 +33,7 @@ class Ui_home(object):
 "background-color: rgb(255, 242, 175);")
         self.categoryGroup = QWidget(self.Awidget)
         self.categoryGroup.setObjectName(u"categoryGroup")
-        self.categoryGroup.setGeometry(QRect(30, 30, 511, 281))
+        self.categoryGroup.setGeometry(QRect(30, 30, 551, 331))
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -53,15 +53,12 @@ class Ui_home(object):
         self.categoryLayout.setContentsMargins(0, 0, 0, 0)
         self.categoryContainer = QWidget(self.categoryEntity)
         self.categoryContainer.setObjectName(u"categoryContainer")
-        self.categoryContainer.setStyleSheet(u"background-color: rgb(217, 217, 217);\n"
-"border: none;\n"
-"border-top-right-radius: 16%;\n"
-"border-top-left-radius: 16%;")
-        self.horizontalLayout_6 = QHBoxLayout(self.categoryContainer)
-        self.horizontalLayout_6.setSpacing(0)
-        self.horizontalLayout_6.setObjectName(u"horizontalLayout_6")
-        self.horizontalLayout_6.setSizeConstraint(QLayout.SetMinAndMaxSize)
-        self.horizontalLayout_6.setContentsMargins(0, 0, 0, 0)
+        self.categoryContainer.setStyleSheet(u"")
+        self.verticalLayout_3 = QVBoxLayout(self.categoryContainer)
+        self.verticalLayout_3.setSpacing(0)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_3.setSizeConstraint(QLayout.SetMinAndMaxSize)
+        self.verticalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.category = QLineEdit(self.categoryContainer)
         self.category.setObjectName(u"category")
         sizePolicy1 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
@@ -75,29 +72,12 @@ class Ui_home(object):
         self.category.setFont(font)
         self.category.setStyleSheet(u"background-color: rgb(217, 217, 217);\n"
 "border: none;\n"
+"border-top-right-radius: 16%;\n"
 "border-top-left-radius: 16%;")
         self.category.setAlignment(Qt.AlignCenter)
 
-        self.horizontalLayout_6.addWidget(self.category)
+        self.verticalLayout_3.addWidget(self.category)
 
-        self.close = QPushButton(self.categoryContainer)
-        self.close.setObjectName(u"close")
-        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
-        sizePolicy2.setHorizontalStretch(0)
-        sizePolicy2.setVerticalStretch(0)
-        sizePolicy2.setHeightForWidth(self.close.sizePolicy().hasHeightForWidth())
-        self.close.setSizePolicy(sizePolicy2)
-        self.close.setMinimumSize(QSize(0, 70))
-        self.close.setStyleSheet(u"background-color: rgb(217, 217, 217);\n"
-"border: none;\n"
-"border-top-left-radius: 0%;\n"
-"border-left: 1px solid rgb(0,0,0);\n"
-"margin: 15% 0px;")
-
-        self.horizontalLayout_6.addWidget(self.close)
-
-        self.horizontalLayout_6.setStretch(0, 7)
-        self.horizontalLayout_6.setStretch(1, 1)
 
         self.categoryLayout.addWidget(self.categoryContainer)
 
@@ -108,6 +88,9 @@ class Ui_home(object):
         self.categoryMenu.setObjectName(u"categoryMenu")
         self.refresh = QPushButton(self.categoryGroup)
         self.refresh.setObjectName(u"refresh")
+        sizePolicy2 = QSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        sizePolicy2.setHorizontalStretch(0)
+        sizePolicy2.setVerticalStretch(0)
         sizePolicy2.setHeightForWidth(self.refresh.sizePolicy().hasHeightForWidth())
         self.refresh.setSizePolicy(sizePolicy2)
         self.refresh.setFont(font)
@@ -270,12 +253,12 @@ class Ui_home(object):
         self.horizontalLayout_3 = QHBoxLayout(self.completedMessage)
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.horizontalLayout_3.setContentsMargins(10, 0, 0, 0)
-        self.okIcon = QLabel(self.completedMessage)
-        self.okIcon.setObjectName(u"okIcon")
-        self.okIcon.setMaximumSize(QSize(20, 20))
-        self.okIcon.setStyleSheet(u"border-image: url(:/icon/images/ok.png);")
+        self.ok = QLabel(self.completedMessage)
+        self.ok.setObjectName(u"ok")
+        self.ok.setMaximumSize(QSize(20, 20))
+        self.ok.setStyleSheet(u"border-image: url(:/icon/images/ok.png);")
 
-        self.horizontalLayout_3.addWidget(self.okIcon)
+        self.horizontalLayout_3.addWidget(self.ok)
 
         self.completedLabel = QLabel(self.completedMessage)
         self.completedLabel.setObjectName(u"completedLabel")
@@ -290,86 +273,6 @@ class Ui_home(object):
 
         self.horizontalLayout_3.setStretch(0, 1)
         self.horizontalLayout_3.setStretch(1, 3)
-        self.pushButton = QPushButton(self.Awidget)
-        self.pushButton.setObjectName(u"pushButton")
-        self.pushButton.setGeometry(QRect(100, 350, 75, 23))
-        self.pushButton.setStyleSheet(u"border: none;\n"
-"border-left: 1px solid rgb(0,0,0);\n"
-"margin: 5px 0px;")
-        self.fuser = QWidget(self.Awidget)
-        self.fuser.setObjectName(u"fuser")
-        self.fuser.setGeometry(QRect(560, 40, 321, 301))
-        self.fuser.setMinimumSize(QSize(321, 301))
-        self.fuser.setMaximumSize(QSize(321, 301))
-        self.fuser.setStyleSheet(u"background-color: rgb(255, 255, 255);")
-        self.verticalLayout_2 = QVBoxLayout(self.fuser)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.fuserQuestion = QLabel(self.fuser)
-        self.fuserQuestion.setObjectName(u"fuserQuestion")
-        sizePolicy3.setHeightForWidth(self.fuserQuestion.sizePolicy().hasHeightForWidth())
-        self.fuserQuestion.setSizePolicy(sizePolicy3)
-        font4 = QFont()
-        font4.setPointSize(14)
-        font4.setUnderline(False)
-        font4.setStrikeOut(False)
-        self.fuserQuestion.setFont(font4)
-        self.fuserQuestion.setStyleSheet(u"text-decoration: none;")
-        self.fuserQuestion.setAlignment(Qt.AlignCenter)
-        self.fuserQuestion.setWordWrap(True)
-
-        self.verticalLayout_2.addWidget(self.fuserQuestion)
-
-        self.scrollArea = QScrollArea(self.fuser)
-        self.scrollArea.setObjectName(u"scrollArea")
-        self.scrollArea.setStyleSheet(u"border: none;")
-        self.scrollArea.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-        self.scrollArea.setWidgetResizable(True)
-        self.scrollAreaWidgetContents = QWidget()
-        self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
-        self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 303, 166))
-        self.scrollLayout = QVBoxLayout(self.scrollAreaWidgetContents)
-        self.scrollLayout.setObjectName(u"scrollLayout")
-        self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-
-        self.verticalLayout_2.addWidget(self.scrollArea)
-
-        self.okLayout = QHBoxLayout()
-        self.okLayout.setObjectName(u"okLayout")
-        self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
-
-        self.okLayout.addItem(self.horizontalSpacer)
-
-        self.ok = QPushButton(self.fuser)
-        self.ok.setObjectName(u"ok")
-        sizePolicy2.setHeightForWidth(self.ok.sizePolicy().hasHeightForWidth())
-        self.ok.setSizePolicy(sizePolicy2)
-        self.ok.setFont(font)
-        self.ok.setStyleSheet(u"background-color: rgb(241, 241, 241);\n"
-"border: 1px solid black;\n"
-"border-radius: 0%;padding: 5%;margin: 10% 0%;")
-
-        self.okLayout.addWidget(self.ok)
-
-
-        self.verticalLayout_2.addLayout(self.okLayout)
-
-        self.categoryRadio = QRadioButton(self.Awidget)
-        self.categoryRadio.setObjectName(u"categoryRadio")
-        self.categoryRadio.setGeometry(QRect(600, 430, 171, 31))
-        sizePolicy2.setHeightForWidth(self.categoryRadio.sizePolicy().hasHeightForWidth())
-        self.categoryRadio.setSizePolicy(sizePolicy2)
-        self.categoryRadio.setMinimumSize(QSize(0, 30))
-        self.categoryRadio.setMaximumSize(QSize(20000, 40))
-        self.categoryRadio.setStyleSheet(u"")
-        self.fuserQuestion_2 = QLabel(self.Awidget)
-        self.fuserQuestion_2.setObjectName(u"fuserQuestion_2")
-        self.fuserQuestion_2.setGeometry(QRect(620, 380, 231, 21))
-        sizePolicy3.setHeightForWidth(self.fuserQuestion_2.sizePolicy().hasHeightForWidth())
-        self.fuserQuestion_2.setSizePolicy(sizePolicy3)
-        self.fuserQuestion_2.setFont(font4)
-        self.fuserQuestion_2.setStyleSheet(u"text-decoration: none;")
-        self.fuserQuestion_2.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
-        self.fuserQuestion_2.setWordWrap(True)
 
         self.verticalLayout.addWidget(self.Awidget)
 
@@ -384,7 +287,6 @@ class Ui_home(object):
     def retranslateUi(self, home):
         home.setWindowTitle(QCoreApplication.translate("home", u"Template", None))
         self.category.setText(QCoreApplication.translate("home", u"Cat\u00e9gorie x", None))
-        self.close.setText(QCoreApplication.translate("home", u"X", None))
         self.refresh.setText(QCoreApplication.translate("home", u"Rafra\u00eechir", None))
         self.renameAll.setText(QCoreApplication.translate("home", u"Tout renommer", None))
         self.fuseWith.setText(QCoreApplication.translate("home", u"Fusionner avec", None))
@@ -396,12 +298,7 @@ class Ui_home(object):
         self.evenNewName.setText(QCoreApplication.translate("home", u"Nouveau nom", None))
         self.loader.setText("")
         self.operating.setText(QCoreApplication.translate("home", u"Chargement ...", None))
-        self.okIcon.setText("")
+        self.ok.setText("")
         self.completedLabel.setText(QCoreApplication.translate("home", u"Termin\u00e9", None))
-        self.pushButton.setText(QCoreApplication.translate("home", u"X", None))
-        self.fuserQuestion.setText(QCoreApplication.translate("home", u"<html><head/><body><p>Avec quelle cat\u00e9gorie souhaitez-vous la fusionner ?</p></body></html>", None))
-        self.ok.setText(QCoreApplication.translate("home", u"OK", None))
-        self.categoryRadio.setText(QCoreApplication.translate("home", u"Category Name", None))
-        self.fuserQuestion_2.setText(QCoreApplication.translate("home", u"<html><head/><body><p>CategoryName</p></body></html>", None))
     # retranslateUi
 

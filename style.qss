@@ -1,4 +1,4 @@
-*{
+QCheckBox, QLabel, QPushButton{
     font-size: 16px;
 }
 
@@ -15,7 +15,7 @@ QPushButton#createNewFolderFollow:pressed{
     font-size: 16px;
 }
 
-#evenOldName, #evenNewName, #oddOldName, #oddNewName, #operating {
+#inputName, #evenOldName, #evenNewName, #oddOldName, #oddNewName, #operating {
     font-size: 12px;
 }
 

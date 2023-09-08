@@ -12,7 +12,6 @@ import os
 import win32com.client
 from operator import itemgetter
 import time
-import shutil
 
 def resource_path(relative_path):
     try:
@@ -43,13 +42,10 @@ if __name__ == "__main__":
     #window.setWindowTitle( QCoreApplication.translate("Template", "Template", None) )
     
     # Global Variables 
-    window.__setattr__("pathFolder", "")
     window.__setattr__("filesNames", [])
     window.__setattr__("filesObjects", [])
     window.__setattr__("filesPreviousNames", [])
     window.__setattr__("filesPreviousObjects", [])
-    window.__setattr__("filesPreviousOriginalsNames", [])
-    window.__setattr__("filesPreviousOriginalsObjects", [])
     window.__setattr__("filesOriginalsNames", [])
     window.__setattr__("filesOriginalsObjects", [])
     window.__setattr__("categoriesNamesInputs", [])
@@ -77,7 +73,6 @@ if __name__ == "__main__":
         # window.loader.start()
         # gf.set_timeout(lambda : window.m_ui.statusbar.addWidget(window.renamer.m_ui.loadSpinner), 0)
         
-        window.pathFolder = _pathFolder
         files = os.listdir(_pathFolder)
         filesy = [ i for i in files if re.search( r'\..*$', i ) != None ]
         filesyly = [ gf.get_episode_object(i) for i in filesy ]
@@ -97,7 +92,7 @@ if __name__ == "__main__":
         # print( gf.get_episode_object(gf.get_name_from_object(files_sorted[0][0])) )
         return files_sorted
         
-    def show_categories(_files_names: list[str], _files_sorted: list[list[dict]]) :
+    def show_categories(_files_names: list[str], _files_sorted: list[list[dict]], _index : int) :
         """Show in the GUI the sorted files
 
         Args:
@@ -107,69 +102,47 @@ if __name__ == "__main__":
         # return
         window.categoriesNamesInputs = [ QLineEdit(i) for i in _files_names ] # _files_names.copy()
         window.categoryInputs = [ [ QLineEdit(j["final"]) for j in i ] for i in _files_sorted ]
+        # window.categoryInputs = [ [ j["final"] for j in i ] for i in _files_sorted ]
         gf.clear_layout(window.m_ui.scrollLayout)
-        [ show_category(i) for i in range(len(_files_names)) ]
+        for i in range(len(_files_names)) :
+            window.__setattr__(f"category{i}", gf.load_py("renamer"))
+            window.__getattribute__(f"category{i}").m_ui.category.setText(_files_names[i])
+            window.__setattr__(f"categoryLayout{i}", QVBoxLayout())
+            window.__getattribute__(f"categoryLayout{i}").setObjectName(f"categoryLayout{i}")
+            for j in range(len(_files_sorted[i])) :
+                window.__setattr__(f"category{i}-{j}", gf.load_py("renamer"))
+                if j%2 == 0 :
+                    window.__getattribute__(f"category{i}-{j}").m_ui.evenOldName.setText(_files_sorted[i][j]['original'])
+                    window.__getattribute__(f"category{i}-{j}").m_ui.evenNewName.setText(_files_sorted[i][j]['final'])
+                    # window.__getattribute__(f"category{i}-{j}").m_ui.evenNewName.textChanged.connect(lambda _, i=i, j=j :  window.categoryInputs[i][j].setText(_) )
+                    # window.categoryInputs[i][j].textChanged.connect(lambda _, i=i, j=j , inputLine = window.__getattribute__(f"category{i}-{j}") :  print(i,j,_, inputLine.m_ui.evenNewName.text())) # inputLine.m_ui.evenNewName.setText(_) )
+                    # window.categoryInputs[i][j].textChanged.connect(lambda _, i=i, j=j , inputLine = :  window.__getattribute__(f"category{i}-{j}").m_ui.evenNewName.setText(_) )
+                    window.__getattribute__(f"category{i}-{j}").m_ui.evenContainer.setObjectName(f"inputContainer{j}")
+                    window.__getattribute__(f"category{i}-{j}").m_ui.evenNewName.setObjectName(f"inputName")
+                    window.__getattribute__(f"categoryLayout{i}").addWidget(window.__getattribute__(f"category{i}-{j}").m_ui.evenContainer)
+                    # window.categoryInputs[i][j].textChanged.connect(lambda _, i=i, j=j , inputLine = window.__getattribute__(f"categoryLayout{i}").itemAt(0).widget() :  print(i,j,_, inputLine.objectName())) # inputLine.m_ui.evenNewName.setText(_) )
+                else :
+                    window.__getattribute__(f"category{i}-{j}").m_ui.oddOldName.setText(_files_sorted[i][j]['original'])
+                    window.__getattribute__(f"category{i}-{j}").m_ui.oddNewName.setText(_files_sorted[i][j]['final'])
+                    # window.__getattribute__(f"category{i}-{j}").m_ui.oddNewName.textChanged.connect(lambda _, i=i, j=j :  window.categoryInputs[i][j].setText(_) )
+                    window.__getattribute__(f"category{i}-{j}").m_ui.oddContainer.setObjectName(f"inputContainer{j}")
+                    window.__getattribute__(f"category{i}-{j}").m_ui.oddNewName.setObjectName(f"inputName")
+                    # window.categoryInputs[i][j].textChanged.connect(lambda _, i=i, j=j :  window.__getattribute__(f"category{i}-{j}").m_ui.oddNewName.setText(_) )
+                    window.__getattribute__(f"categoryLayout{i}").addWidget(window.__getattribute__(f"category{i}-{j}").m_ui.oddContainer) 
+            window.__getattribute__(f'category{i}').m_ui.categoryLayout.addLayout(window.__getattribute__(f'categoryLayout{i}'))
+            window.__getattribute__(f"category{i}").m_ui.category.setText(_files_names[i])
+            # window.__getattribute__(f"category{i}").m_ui.category.textChanged.connect(lambda _, i=i : window.categoriesNamesInputs[i].setText(_) ) # set_in_list("categoriesNamesInputs", i, _)) 
+            # window.__getattribute__(f"category{i}").m_ui.refresh.clicked.connect(lambda _=0, i=i : refresh_data(i))
+            # window.__getattribute__(f"category{i}").m_ui.close.clicked.connect(lambda _=0, i=i : close_group(i))
+            window.m_ui.scrollLayout.addWidget(window.__getattribute__(f'category{i}').m_ui.categoryGroup)
             
         connect_all_widgets()
+        # [ [ window.categoryInputs[i][j].textChanged.connect(lambda _, i=i, j=j : window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").setText(_)) for j in range(len(_files_sorted[i])) ] for i in range(len(_files_sorted)) ]
         
-    def show_category(_index : int) :
-        """Show the category 
-
-        Args:
-            _index (int): The index of the category to show
-        """
-        window.__setattr__(f"category{_index}", gf.load_py("renamer"))
-        window.__setattr__(f"categoryLayout{_index}", QVBoxLayout())
-        window.__getattribute__(f"categoryLayout{_index}").setObjectName(f"categoryLayout{_index}")
-        for j in range(len(window.filesObjects[_index])) :
-            window.__setattr__(f"category{_index}-{j}", gf.load_py("renamer"))
-            if j%2 == 0 :
-                window.__getattribute__(f"category{_index}-{j}").m_ui.evenOldName.setText(window.filesOriginalsObjects[_index][j]['original'])
-                window.__getattribute__(f"category{_index}-{j}").m_ui.evenNewName.setText(window.filesObjects[_index][j]['final'])
-                window.__getattribute__(f"category{_index}-{j}").m_ui.evenContainer.setObjectName(f"inputContainer{j}")
-                window.__getattribute__(f"category{_index}-{j}").m_ui.evenNewName.setObjectName(f"inputName")
-                window.__getattribute__(f"categoryLayout{_index}").addWidget(window.__getattribute__(f"category{_index}-{j}").m_ui.evenContainer)
-            else :
-                window.__getattribute__(f"category{_index}-{j}").m_ui.oddOldName.setText(window.filesOriginalsObjects[_index][j]['original'])
-                window.__getattribute__(f"category{_index}-{j}").m_ui.oddNewName.setText(window.filesObjects[_index][j]['final'])
-                window.__getattribute__(f"category{_index}-{j}").m_ui.oddContainer.setObjectName(f"inputContainer{j}")
-                window.__getattribute__(f"category{_index}-{j}").m_ui.oddNewName.setObjectName(f"inputName")
-                window.__getattribute__(f"categoryLayout{_index}").addWidget(window.__getattribute__(f"category{_index}-{j}").m_ui.oddContainer) 
-        window.__getattribute__(f'category{_index}').m_ui.categoryLayout.addLayout(window.__getattribute__(f'categoryLayout{_index}'))
-        window.__getattribute__(f"category{_index}").m_ui.category.setText(window.filesNames[_index])
-        window.m_ui.scrollLayout.addWidget(window.__getattribute__(f'category{_index}').m_ui.categoryGroup)        
-        
-    def refresh_category(_index : int) :
-        """Refresh a category
-
-        Args:
-            _index (int): The index of the category to show
-        """
-        # window.__setattr__(f"category{_index}", gf.load_py("renamer"))
-        # gf.c
-        # print(window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").children())
-        gf.clear_layout(window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QVBoxLayout,"categoryLayout"), [0])
-        [ window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, f"inputContainer{j}").deleteLater() for j in range(len(window.filesObjects[_index])) if window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, f"inputContainer{j}") != None ]
-        # return
-        window.__setattr__(f"categoryLayout{_index}", QVBoxLayout())
-        window.__getattribute__(f"categoryLayout{_index}").setObjectName(f"categoryLayout{_index}")
-        for j in range(len(window.filesObjects[_index])) :
-            window.__setattr__(f"category{_index}-{j}", gf.load_py("renamer"))
-            if j%2 == 0 :
-                window.__getattribute__(f"category{_index}-{j}").m_ui.evenOldName.setText(window.filesOriginalsObjects[_index][j]['original'])
-                window.__getattribute__(f"category{_index}-{j}").m_ui.evenNewName.setText(window.filesObjects[_index][j]['final'])
-                window.__getattribute__(f"category{_index}-{j}").m_ui.evenContainer.setObjectName(f"inputContainer{j}")
-                window.__getattribute__(f"category{_index}-{j}").m_ui.evenNewName.setObjectName(f"inputName")
-                window.__getattribute__(f"categoryLayout{_index}").addWidget(window.__getattribute__(f"category{_index}-{j}").m_ui.evenContainer)
-            else :
-                window.__getattribute__(f"category{_index}-{j}").m_ui.oddOldName.setText(window.filesOriginalsObjects[_index][j]['original'])
-                window.__getattribute__(f"category{_index}-{j}").m_ui.oddNewName.setText(window.filesObjects[_index][j]['final'])
-                window.__getattribute__(f"category{_index}-{j}").m_ui.oddContainer.setObjectName(f"inputContainer{j}")
-                window.__getattribute__(f"category{_index}-{j}").m_ui.oddNewName.setObjectName(f"inputName")
-                window.__getattribute__(f"categoryLayout{_index}").addWidget(window.__getattribute__(f"category{_index}-{j}").m_ui.oddContainer) 
-        window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QVBoxLayout,"categoryLayout").addLayout(window.__getattribute__(f'categoryLayout{_index}'))
-        # window.__getattribute__(f"category{_index}").m_ui.category.setText(window.filesNames[_index])
-        # window.m_ui.scrollLayout.addWidget(window.__getattribute__(f'category{_index}').m_ui.categoryGroup)   
+        # window.m_ui.statusbar.removeWidget(window.renamer.m_ui.loadSpinner)
+        # window.m_ui.statusbar.addWidget(window.renamer.m_ui.completedMessage)
+        # time.sleep(10)
+        # window.m_ui.statusbar.removeWidget(window.renamer.m_ui.completedMessage)
         
     def set_in_2D_list(_list: list, _first_index : int, _second_index : int, _value : any) :
         """Set the value at the index in a specific list of window
@@ -182,18 +155,6 @@ if __name__ == "__main__":
         """
         window.__getattribute__(_list)[_first_index][_second_index] = _value
         
-    def set_in_2D_dict(_list: list, _first_index : int, _second_index : int, _key : any, _value : any) :
-        """Set the value at the index in a specific 2D list of dictionaries of window
-
-        Args:
-            _list (list): The name of the list in window
-            _first_index (int): The first index in the first dimension
-            _second_index (int): The second index in the second dimension
-            _key (any): The key to set
-            _value (any): The value to set
-        """
-        window.__getattribute__(_list)[_first_index][_second_index][_key] = _value
-        
     def set_in_list(_list: list, _index : int, _value : any) :
         """Set the value at the index in a specific list of window
 
@@ -204,24 +165,14 @@ if __name__ == "__main__":
         """
         window.__getattribute__(_list)[_index] = _value        
         
-    def rename_all(_index : int) :
-        # os.path.join()
-        [ os.rename( os.path.join(window.pathFolder.replace('/','\\'), window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder.replace('/','\\'), window.filesObjects[_index][j]["final"]) ) for j in range(len(window.filesObjects[_index])) ]
-        # [ shutil.move( os.path.join(window.pathFolder.replace('/','\\'), window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder.replace('/','\\'), window.filesObjects[_index][j]["final"]) ) for j in range(len(window.filesObjects[_index])) ]
-        # [ shutil.move( os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder, window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").text()) ) for j in range(len(window.filesObjects[_index])) ]
-        
     def connect_all_widgets():
         """Connect all the widgets of the scrollLayout
         """        
-        # QLineEdit.textChanged.
-        [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"category").textChanged, lambda _=0, i=i : window.categoriesNamesInputs[i].setText(_) ) for i in range(len(window.filesNames)) ]
         
-        [  [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").textChanged, lambda _=0, i=i : set_in_2D_dict("filesObjects", i, j, "final", _) ) for j in range(len(window.filesObjects[i])) ] for i in range(len(window.filesNames))  ]
-        
-        [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"refresh").clicked, lambda _=0, i=i : refresh_data(i)) for i in range(len(window.filesNames)) ]
-        [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"renameAll").clicked, lambda _=0, i=i : rename_all(i)) for i in range(len(window.filesNames)) ]
-        [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"fuseWith").clicked, lambda _=0, i=i : fuse_with(i)) for i in range(len(window.filesNames)) ]
-        [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"close").clicked, lambda _=0, i=i : close_group(i)) for i in range(len(window.filesNames)) ]
+        [ window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"category").textChanged.connect(lambda _=0, i=i : window.categoriesNamesInputs[i].setText(_) ) for i in range(len(window.filesNames)) ]
+        [ window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"refresh").clicked.connect(lambda _=0, i=i : refresh_data(i)) for i in range(len(window.filesNames)) ]
+        [ window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"fuse_with").clicked.connect(lambda _=0, i=i : fuse_with(i)) for i in range(len(window.filesNames)) ]
+        [ window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"close").clicked.connect(lambda _=0, i=i : close_group(i)) for i in range(len(window.filesNames)) ]
                 
     def set_in_dict(_dict : list[dict], _key : str, _value : any) :
         """Set a key, value in a dictionary
@@ -240,45 +191,25 @@ if __name__ == "__main__":
             _where (int): The category where we put the other
             _who (int): The category to put in another
         """
-        if _where == None :
-            # print(_where, _who)
-            return
-        # print(_where, _who)
-        
-        # Saving the previous data
         window.filesPreviousNames.append(window.filesNames.copy())
         window.filesPreviousObjects.append(window.filesObjects.copy())
-        window.filesPreviousOriginalsNames.append(window.filesOriginalsNames.copy())
-        window.filesPreviousOriginalsObjects.append(window.filesOriginalsObjects.copy())
-        
-        # Copying the datas of the _who cateory in the _where category
         window.filesObjects[_where].extend(window.filesObjects[_who])        
-        window.filesObjects[_where] = sorted(window.filesObjects[_where], key=itemgetter('episode'))
-        window.filesOriginalsObjects[_where].extend(window.filesOriginalsObjects[_who])        
-        window.filesOriginalsObjects[_where] = sorted(window.filesOriginalsObjects[_where], key=itemgetter('episode'))
-
-        # Finish with the remaining tasks
-        refresh_category(_where)
+        window.filesObjects[_where] = [ sorted(i, key=itemgetter('episode')) for i in window.filesObjects[_where] ]
         close_group(_who)
-        window.fuser.close()
+        refresh_data(_where)
                 
     def fuse_with(_index : int) :
-        """Open a popup widget to pick a category to fuse the given one in
-
-        Args:
-            _index (int): The index of the category to fuse in another
-        """        
         window.__setattr__('fuser', gf.load_py('fuser'))
         window.fuser.setFont(QFont(fontDatabase.applicationFontFamilies(0)[0], 10))
-        radios = []
-        for i in range(len(window.filesObjects)) :
+        radios = []        
+        for i in range(len(window.filesNames)) :
             if i != _index :
+                radios.append({window.filesNames[i] : False})
                 window.__setattr__(f"fuser{i}", gf.load_py('renamer'))
                 window.__getattribute__(f"fuser{i}").m_ui.categoryRadio.setText(gf.autoWrap(window.filesNames[i], 80))
-                window.__getattribute__(f"fuser{i}").m_ui.categoryRadio.toggled.connect(lambda _, i=i : radios.append( i ) if _ == True else None) # set_in_dict(radios, window.filesNames[i], _)) # print(window.filesNames[i], _))
+                window.__getattribute__(f"fuser{i}").m_ui.categoryRadio.toggled.connect(lambda _, i=i : set_in_dict(radios, window.filesNames[i], _)) # print(window.filesNames[i], _))
                 window.fuser.m_ui.scrollLayout.addWidget(window.__getattribute__(f"fuser{i}").m_ui.categoryRadio)
-        window.fuser.m_ui.ok.clicked.connect(lambda _='t' : fuse_categories(radios[-1] if len(radios) != 0 else None, _index))
-        # window.fuser.m_ui.ok.clicked.connect(lambda _='t', _where = radios[i] if len(radios) != 0 else None : fuse_categories(_where, _index))
+        window.fuser.m_ui.ok.clicked.connect(lambda : window.fuser.close())
         window.fuser.show()
         # window.fuser.m_ui.scr
         # window.fuser.close()
@@ -286,31 +217,15 @@ if __name__ == "__main__":
         # QWidget.
         
     def close_group(_index : int) :
-        """Close and delete a category
-
-        Args:
-            _index (int): The index of the category
-        """        
-        # Saving the previous datas
         window.filesPreviousNames.append(window.filesNames.copy())
         window.filesPreviousObjects.append(window.filesObjects.copy())
-        window.filesPreviousOriginalsNames.append(window.filesOriginalsNames.copy())
-        window.filesPreviousOriginalsObjects.append(window.filesOriginalsObjects.copy())
         
-        # Delete the index of category to close
-        # print(_index, len(window.filesNames)-1)
         del window.filesNames[_index]
         del window.filesObjects[_index]
-        del window.filesOriginalsNames[_index]
-        del window.filesOriginalsObjects[_index]
         del window.categoriesNamesInputs[_index]
         del window.categoryInputs[_index]
-        # print("After ", _index, len(window.filesNames)-1)
-        
-        # Remove it from layout
         gf.remove_from_layout(window.m_ui.scrollLayout, _index)
         
-        # Reconnect all widgets
         connect_all_widgets()
         
     def refresh_data(_index : int) :
@@ -333,7 +248,7 @@ if __name__ == "__main__":
             # QWidget.fi
             # print(type( widgetToRemove))
         
-        # print(_index, window.filesObjects[_index])
+        # print(_index, window.categoriesNamesInputs[_index])
         if window.filesNames[_index] != window.categoriesNamesInputs[_index].text() :
             categoryObject = gf.get_episode_object(window.categoriesNamesInputs[_index].text(), True)
             window.filesPreviousNames.append(window.filesNames.copy())
@@ -341,8 +256,8 @@ if __name__ == "__main__":
             set_in_list("filesNames", _index, categoryObject["name"])
             window.__setattr__(f"categoryLayout{_index}", QVBoxLayout())
             window.__getattribute__(f"categoryLayout{_index}").setObjectName(f"categoryLayout{_index}")
-            for j in range(len(window.filesObjects[_index])) :
-                fileObject = window.filesObjects[_index][j] # gf.get_episode_object(window.categoryInputs[_index][j].text())
+            for j in range(len(window.categoryInputs[_index])) :
+                fileObject = gf.get_episode_object(window.categoryInputs[_index][j].text())
                 fileObject["name"] = categoryObject["name"]
                 if categoryObject["season"] != 0 :
                     fileObject["season"] = categoryObject["season"]
@@ -352,9 +267,8 @@ if __name__ == "__main__":
                     fileObject["type"] = categoryObject["type"]
                 fileObject["final"] = gf.get_name_from_object(fileObject)
                 window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").setText(fileObject["final"])
-                # print(fileObject['final'], window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").text(), window.filesObjects[_index][j]["final"])
-                # window.categoryInputs[_index][j].setText(fileObject["final"])
-                # set_in_2D_list("filesObjects", _index, j, fileObject)
+                window.categoryInputs[_index][j].setText(fileObject["final"])
+                set_in_2D_list("filesObjects", _index, j, fileObject)
         
     def refresh_datas() :
         """Refresh all the datas

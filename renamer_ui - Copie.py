@@ -19,7 +19,7 @@ class Ui_home(object):
     def setupUi(self, home):
         if not home.objectName():
             home.setObjectName(u"home")
-        home.resize(909, 571)
+        home.resize(909, 541)
         icon = QIcon()
         icon.addFile(u":/newPrefix/template_icon.png", QSize(), QIcon.Normal, QIcon.Off)
         home.setWindowIcon(icon)
@@ -329,6 +329,22 @@ class Ui_home(object):
         self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 303, 166))
         self.scrollLayout = QVBoxLayout(self.scrollAreaWidgetContents)
         self.scrollLayout.setObjectName(u"scrollLayout")
+        self.radioButton = QRadioButton(self.scrollAreaWidgetContents)
+        self.radioButton.setObjectName(u"radioButton")
+        sizePolicy2.setHeightForWidth(self.radioButton.sizePolicy().hasHeightForWidth())
+        self.radioButton.setSizePolicy(sizePolicy2)
+
+        self.scrollLayout.addWidget(self.radioButton)
+
+        self.radioButton_2 = QRadioButton(self.scrollAreaWidgetContents)
+        self.radioButton_2.setObjectName(u"radioButton_2")
+        sizePolicy2.setHeightForWidth(self.radioButton_2.sizePolicy().hasHeightForWidth())
+        self.radioButton_2.setSizePolicy(sizePolicy2)
+        self.radioButton_2.setMinimumSize(QSize(0, 67))
+        self.radioButton_2.setMaximumSize(QSize(16777215, 20))
+
+        self.scrollLayout.addWidget(self.radioButton_2)
+
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 
         self.verticalLayout_2.addWidget(self.scrollArea)
@@ -355,21 +371,11 @@ class Ui_home(object):
 
         self.categoryRadio = QRadioButton(self.Awidget)
         self.categoryRadio.setObjectName(u"categoryRadio")
-        self.categoryRadio.setGeometry(QRect(600, 430, 171, 31))
+        self.categoryRadio.setGeometry(QRect(680, 410, 285, 30))
         sizePolicy2.setHeightForWidth(self.categoryRadio.sizePolicy().hasHeightForWidth())
         self.categoryRadio.setSizePolicy(sizePolicy2)
         self.categoryRadio.setMinimumSize(QSize(0, 30))
-        self.categoryRadio.setMaximumSize(QSize(20000, 40))
-        self.categoryRadio.setStyleSheet(u"")
-        self.fuserQuestion_2 = QLabel(self.Awidget)
-        self.fuserQuestion_2.setObjectName(u"fuserQuestion_2")
-        self.fuserQuestion_2.setGeometry(QRect(620, 380, 231, 21))
-        sizePolicy3.setHeightForWidth(self.fuserQuestion_2.sizePolicy().hasHeightForWidth())
-        self.fuserQuestion_2.setSizePolicy(sizePolicy3)
-        self.fuserQuestion_2.setFont(font4)
-        self.fuserQuestion_2.setStyleSheet(u"text-decoration: none;")
-        self.fuserQuestion_2.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
-        self.fuserQuestion_2.setWordWrap(True)
+        self.categoryRadio.setMaximumSize(QSize(16777215, 30))
 
         self.verticalLayout.addWidget(self.Awidget)
 
@@ -400,8 +406,9 @@ class Ui_home(object):
         self.completedLabel.setText(QCoreApplication.translate("home", u"Termin\u00e9", None))
         self.pushButton.setText(QCoreApplication.translate("home", u"X", None))
         self.fuserQuestion.setText(QCoreApplication.translate("home", u"<html><head/><body><p>Avec quelle cat\u00e9gorie souhaitez-vous la fusionner ?</p></body></html>", None))
+        self.radioButton.setText(QCoreApplication.translate("home", u"CategoryName", None))
+        self.radioButton_2.setText(QCoreApplication.translate("home", u"CategoryName", None))
         self.ok.setText(QCoreApplication.translate("home", u"OK", None))
-        self.categoryRadio.setText(QCoreApplication.translate("home", u"Category Name", None))
-        self.fuserQuestion_2.setText(QCoreApplication.translate("home", u"<html><head/><body><p>CategoryName</p></body></html>", None))
+        self.categoryRadio.setText(QCoreApplication.translate("home", u"CategoryName", None))
     # retranslateUi
 
