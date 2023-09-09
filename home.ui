@@ -303,6 +303,9 @@ color: rgb(217, 217, 217);font-style: italic;</string>
     <property name="title">
      <string>Edition</string>
     </property>
+    <addaction name="actionUndo"/>
+    <addaction name="actionRedo"/>
+    <addaction name="separator"/>
     <addaction name="actionTout_Rafra_chir"/>
     <addaction name="actionTout_Renommer"/>
    </widget>
@@ -341,12 +344,22 @@ color: rgb(217, 217, 217);font-style: italic;</string>
   </action>
   <action name="actionTout_Renommer">
    <property name="text">
-    <string>Tout Renommer         Ctrl+F2</string>
+    <string>Tout Renommer</string>
    </property>
   </action>
   <action name="actionQuitter">
    <property name="text">
     <string>Quitter</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>Redo</string>
    </property>
   </action>
  </widget>

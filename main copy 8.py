@@ -12,16 +12,7 @@ import os
 import win32com.client
 from operator import itemgetter
 import time
-from enum import Enum
-import Action
-
-class CategoriesStatus(Enum) :
-    NOT_TREATED = 0
-    TREATED = 1
-
-class CategoriesColors(Enum) :
-    GREEN = ["rgb(28,255,81)", "rgb(126,255,152)"]
-    GRAY = ["rgb(217,217,217)", "rgb(241,241,241)"]
+import shutil
 
 def resource_path(relative_path):
     try:
@@ -57,16 +48,6 @@ if __name__ == "__main__":
     window.__setattr__("filesObjects", [])
     window.__setattr__("filesObjects", [])
     # window.__setattr__("filesOriginals", )
-    window.__setattr__("previousDatas", {
-        "filesNames" : [ ],
-        "filesObjects" : [ ],
-        "filesOriginalsNames" : [ ],
-        "filesOriginalsObjects" : [ ],
-        "canCreateNewFolder" : [ ],
-        "createNewFolder" : [ ],
-        "categoriesStatus" : [ ],
-    })
-    window.__setattr__("userActions", [])
     window.__setattr__("filesPreviousNames", [])
     window.__setattr__("filesPreviousObjects", [])
     window.__setattr__("filesPreviousOriginalsNames", [])
@@ -79,7 +60,6 @@ if __name__ == "__main__":
     # window.__setattr__("originalsCanCreateNewFolder", [])
     window.__setattr__("previousCanCreateNewFolder", [])
     # window.__setattr__("categoryInputsLabels", [])
-    window.__setattr__("categoriesStatus", [])
     
     def activePage(page: str) :
         match page :
@@ -118,7 +98,6 @@ if __name__ == "__main__":
         window.filesOriginalsNames = window.filesNames.copy()
         window.filesOriginalsObjects = window.filesObjects.copy()
         window.canCreateNewFolder = [ False for i in files_names ]
-        window.categoriesStatus = [ CategoriesStatus.NOT_TREATED.value for i in files_names ]
         # window.originalsCanCreateNewFolder = [ False for i in files_names ]
         
         show_categories(files_names, files_sorted)   
@@ -199,7 +178,6 @@ if __name__ == "__main__":
         window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QVBoxLayout,"categoryLayout").addLayout(window.__getattribute__(f'categoryLayout{_index}'))
         # window.__getattribute__(f"category{_index}").m_ui.category.setText(window.filesNames[_index])
         # window.m_ui.scrollLayout.addWidget(window.__getattribute__(f'category{_index}').m_ui.categoryGroup)   
-        recolor_category(_index, "GRAY")
         
     def set_in_2D_list(_list: list, _first_index : int, _second_index : int, _value : any) :
         """Set the value at the index in a specific list of window
@@ -237,9 +215,7 @@ if __name__ == "__main__":
     def should_create_new_folder(_bool : bool, _index : int) :
         
         # Saving previous datas
-        window.userActions.append(Action.Action(Action.TypeActions["CHECK_CAN_CREATE_NEW_FOLDER"], _index, _bool, window.canCreateNewFolder.copy()))
-        # window.previousDatas["canCreateNewFolder"].append(Action.Action(Action.TypeActions["CHECK_CAN_CREATE_NEW_FOLDER"], _index, _bool, window.canCreateNewFolder))
-        # window.previousCanCreateNewFolder.append(window.canCreateNewFolder)
+        window.previousCanCreateNewFolder.append(window.canCreateNewFolder)
         
         # Updating new datas
         window.canCreateNewFolder[_index] = _bool
@@ -250,25 +226,10 @@ if __name__ == "__main__":
         Args:
             _first_index (int): The first index of the file object
             _second_index (int): The second index of the file object
-        """       
-        # Saving previous datas
-        window.userActions.append(Action.Action(Action.TypeActions["CREATE_NEW_FOLDER"], _first_index, window.filesNames[_first_index], window.categoriesStatus.copy()))
-         
+        """        
         if not os.path.exists(os.path.join(window.pathFolder, window.filesNames[_first_index])) :
             os.makedirs(os.path.join(window.pathFolder, window.filesNames[_first_index]))
         os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_first_index][_second_index]["original"]), os.path.join(os.path.join(window.pathFolder, window.filesNames[_first_index]), window.filesObjects[_first_index][_second_index]["final"]) )
-        
-    def recolor_category(_index : int, _color : str = "GREEN") :
-        
-        window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[0]};" )
-        window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"category").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"category").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[0]};" )
-        window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"close").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"close").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[0]};" )
-        
-        [ window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").styleSheet() + (f"background-color : {CategoriesColors[_color.upper()].value[1]};" if j%2 == 0 else "") ) for j in range(len(window.filesObjects[_index])) ]
-        
-        window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"refresh").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"refresh").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[1]};" )
-        window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"renameAll").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"renameAll").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[1]};" )
-        window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"fuseWith").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"fuseWith").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[1]};" )
         
     def rename_all(_index : int) :
         # os.path.join()
@@ -276,13 +237,7 @@ if __name__ == "__main__":
         # print(window.filesOriginalsObjects[_index])
         # [ print( window.filesOriginalsObjects[_index][j]["original"], window.filesObjects[_index][j]["final"] ) for j in range(len(window.filesObjects[_index])) ]
         
-        # Saving previous datas
-        if not window.canCreateNewFolder[_index] :
-            window.userActions.append(Action.Action(Action.TypeActions["RENAME_ALL"], _index, None, window.categoriesStatus.copy()))
-        
         [ os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder, window.filesObjects[_index][j]["final"]) ) if not window.canCreateNewFolder[_index] else create_new_folder(_index, j) for j in range(len(window.filesObjects[_index])) ]
-        window.categoriesStatus[_index] = CategoriesStatus.TREATED.value
-        recolor_category(_index)
         
         # [ shutil.move( os.path.join(window.pathFolder.replace('/','\\'), window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder.replace('/','\\'), window.filesObjects[_index][j]["final"]) ) for j in range(len(window.filesObjects[_index])) ]
         # [ shutil.move( os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder, window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").text()) ) for j in range(len(window.filesObjects[_index])) ]
@@ -325,12 +280,6 @@ if __name__ == "__main__":
         # print(_where, _who)
         
         # Saving the previous data
-        window.userActions.append(Action.Action(Action.TypeActions["FUSE_WITH"], _where, _who, {
-            "filesNames" : window.filesNames.copy(),
-            "filesObjects" : window.filesObjects.copy(),
-            "filesOriginalsNames" : window.filesOriginalsNames.copy(),
-            "filesOriginalsObjects" : window.filesOriginalsObjects.copy(),
-        }))
         window.filesPreviousNames.append(window.filesNames.copy())
         window.filesPreviousObjects.append(window.filesObjects.copy())
         window.filesPreviousOriginalsNames.append(window.filesOriginalsNames.copy())
@@ -380,12 +329,6 @@ if __name__ == "__main__":
             _index (int): The index of the category
         """        
         # Saving the previous datas
-        # window.userActions.append(Action.Action(Action.TypeActions["FUSE_WITH"], _where, _who, {
-        #     "filesNames" : window.filesNames.copy(),
-        #     "filesObjects" : window.filesObjects.copy(),
-        #     "filesOriginalsNames" : window.filesOriginalsNames.copy(),
-        #     "filesOriginalsObjects" : window.filesOriginalsObjects.copy(),
-        # }))
         window.filesPreviousNames.append(window.filesNames.copy())
         window.filesPreviousObjects.append(window.filesObjects.copy())
         window.filesPreviousOriginalsNames.append(window.filesOriginalsNames.copy())
@@ -402,7 +345,6 @@ if __name__ == "__main__":
         del window.categoriesNamesInputs[_index]
         del window.categoryInputs[_index]
         del window.canCreateNewFolder[_index]
-        del window.categoriesStatus[_index]
         # del window.originalsCanCreateNewFolder[_index]
         # print("After ", _index, len(window.filesNames)-1)
         
@@ -411,13 +353,6 @@ if __name__ == "__main__":
         
         # Reconnect all widgets
         connect_all_widgets()
-        
-    def undo() :
-        s = 2
-        
-    def redo() :
-        if False :
-            print('no')
         
     def refresh_data(_index : int) :
         """Refresh the datas of the indexed category
@@ -444,8 +379,7 @@ if __name__ == "__main__":
             categoryObject = gf.get_episode_object(window.categoriesNamesInputs[_index].text(), True)
             window.filesPreviousNames.append(window.filesNames.copy())
             window.filesPreviousObjects.append(window.filesObjects.copy())
-            set_in_list("filesNames", _index, window.categoriesNamesInputs[_index].text())
-            # set_in_list("filesNames", _index, categoryObject["name"])
+            set_in_list("filesNames", _index, categoryObject["name"])
             window.__setattr__(f"categoryLayout{_index}", QVBoxLayout())
             window.__getattribute__(f"categoryLayout{_index}").setObjectName(f"categoryLayout{_index}")
             for j in range(len(window.filesObjects[_index])) :
@@ -459,7 +393,6 @@ if __name__ == "__main__":
                     fileObject["type"] = categoryObject["type"]
                 fileObject["final"] = gf.get_name_from_object(fileObject)
                 window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").setText(fileObject["final"])
-            recolor_category(_index, "GRAY")
                 # print(fileObject['final'], window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").text(), window.filesObjects[_index][j]["final"])
                 # window.categoryInputs[_index][j].setText(fileObject["final"])
                 # set_in_2D_list("filesObjects", _index, j, fileObject)
@@ -502,10 +435,6 @@ if __name__ == "__main__":
     window.m_ui.parcourirButton.clicked.connect(lambda : get_folder())
     window.m_ui.actionParcourir.triggered.connect(lambda : get_folder())
     window.m_ui.actionParcourir.setShortcut('Ctrl+B')
-    window.m_ui.actionUndo.triggered.connect(lambda : undo())
-    window.m_ui.actionUndo.setShortcut('Ctrl+Z')
-    window.m_ui.actionRedo.triggered.connect(lambda : redo())
-    window.m_ui.actionRedo.setShortcut('Ctrl+Shift+Z')
     window.m_ui.actionTout_Rafra_chir.triggered.connect(lambda : refresh_datas())
     window.m_ui.actionTout_Rafra_chir.setShortcut('Ctrl+R')
     window.m_ui.actionQuitter.triggered.connect(lambda : form.quit())

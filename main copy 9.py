@@ -13,7 +13,6 @@ import win32com.client
 from operator import itemgetter
 import time
 from enum import Enum
-import Action
 
 class CategoriesStatus(Enum) :
     NOT_TREATED = 0
@@ -57,16 +56,6 @@ if __name__ == "__main__":
     window.__setattr__("filesObjects", [])
     window.__setattr__("filesObjects", [])
     # window.__setattr__("filesOriginals", )
-    window.__setattr__("previousDatas", {
-        "filesNames" : [ ],
-        "filesObjects" : [ ],
-        "filesOriginalsNames" : [ ],
-        "filesOriginalsObjects" : [ ],
-        "canCreateNewFolder" : [ ],
-        "createNewFolder" : [ ],
-        "categoriesStatus" : [ ],
-    })
-    window.__setattr__("userActions", [])
     window.__setattr__("filesPreviousNames", [])
     window.__setattr__("filesPreviousObjects", [])
     window.__setattr__("filesPreviousOriginalsNames", [])
@@ -237,9 +226,7 @@ if __name__ == "__main__":
     def should_create_new_folder(_bool : bool, _index : int) :
         
         # Saving previous datas
-        window.userActions.append(Action.Action(Action.TypeActions["CHECK_CAN_CREATE_NEW_FOLDER"], _index, _bool, window.canCreateNewFolder.copy()))
-        # window.previousDatas["canCreateNewFolder"].append(Action.Action(Action.TypeActions["CHECK_CAN_CREATE_NEW_FOLDER"], _index, _bool, window.canCreateNewFolder))
-        # window.previousCanCreateNewFolder.append(window.canCreateNewFolder)
+        window.previousCanCreateNewFolder.append(window.canCreateNewFolder)
         
         # Updating new datas
         window.canCreateNewFolder[_index] = _bool
@@ -250,10 +237,7 @@ if __name__ == "__main__":
         Args:
             _first_index (int): The first index of the file object
             _second_index (int): The second index of the file object
-        """       
-        # Saving previous datas
-        window.userActions.append(Action.Action(Action.TypeActions["CREATE_NEW_FOLDER"], _first_index, window.filesNames[_first_index], window.categoriesStatus.copy()))
-         
+        """        
         if not os.path.exists(os.path.join(window.pathFolder, window.filesNames[_first_index])) :
             os.makedirs(os.path.join(window.pathFolder, window.filesNames[_first_index]))
         os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_first_index][_second_index]["original"]), os.path.join(os.path.join(window.pathFolder, window.filesNames[_first_index]), window.filesObjects[_first_index][_second_index]["final"]) )
@@ -275,10 +259,6 @@ if __name__ == "__main__":
         # print(os.listdir(window.pathFolder))
         # print(window.filesOriginalsObjects[_index])
         # [ print( window.filesOriginalsObjects[_index][j]["original"], window.filesObjects[_index][j]["final"] ) for j in range(len(window.filesObjects[_index])) ]
-        
-        # Saving previous datas
-        if not window.canCreateNewFolder[_index] :
-            window.userActions.append(Action.Action(Action.TypeActions["RENAME_ALL"], _index, None, window.categoriesStatus.copy()))
         
         [ os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder, window.filesObjects[_index][j]["final"]) ) if not window.canCreateNewFolder[_index] else create_new_folder(_index, j) for j in range(len(window.filesObjects[_index])) ]
         window.categoriesStatus[_index] = CategoriesStatus.TREATED.value
@@ -325,12 +305,6 @@ if __name__ == "__main__":
         # print(_where, _who)
         
         # Saving the previous data
-        window.userActions.append(Action.Action(Action.TypeActions["FUSE_WITH"], _where, _who, {
-            "filesNames" : window.filesNames.copy(),
-            "filesObjects" : window.filesObjects.copy(),
-            "filesOriginalsNames" : window.filesOriginalsNames.copy(),
-            "filesOriginalsObjects" : window.filesOriginalsObjects.copy(),
-        }))
         window.filesPreviousNames.append(window.filesNames.copy())
         window.filesPreviousObjects.append(window.filesObjects.copy())
         window.filesPreviousOriginalsNames.append(window.filesOriginalsNames.copy())
@@ -380,12 +354,6 @@ if __name__ == "__main__":
             _index (int): The index of the category
         """        
         # Saving the previous datas
-        # window.userActions.append(Action.Action(Action.TypeActions["FUSE_WITH"], _where, _who, {
-        #     "filesNames" : window.filesNames.copy(),
-        #     "filesObjects" : window.filesObjects.copy(),
-        #     "filesOriginalsNames" : window.filesOriginalsNames.copy(),
-        #     "filesOriginalsObjects" : window.filesOriginalsObjects.copy(),
-        # }))
         window.filesPreviousNames.append(window.filesNames.copy())
         window.filesPreviousObjects.append(window.filesObjects.copy())
         window.filesPreviousOriginalsNames.append(window.filesOriginalsNames.copy())
@@ -413,7 +381,11 @@ if __name__ == "__main__":
         connect_all_widgets()
         
     def undo() :
-        s = 2
+        if True in [ [ window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").hasFocus() for j in range(len(window.filesObjects[i])) ] for i in range(len(window.filesObjects)) ] :
+            print("Yes")
+        else :
+            print("No")
+        # QLineEdit.hasFocus()
         
     def redo() :
         if False :
