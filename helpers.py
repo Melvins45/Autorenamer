@@ -98,10 +98,31 @@ def clear_layout(_layout: QLayout, _listToLeave: list[int] = []):
         # print(i, type(_layout.itemAt(i).widget()))
         if i not in _listToLeave :
             # print(i," to remove ")
-            widgetToRemove = _layout.itemAt(i).widget()
+            # if _layout.itemAt(i) == None :
+            #     print(i, _layout.itemAt(i), " is None ")
+            #     _layout.removeItem(_layout.itemAt(i))
+            #     continue
+            # print(i," to remove start ")
+            widgetToRemove = _layout.itemAt(0).widget()
             # remove it from the layout list
             _layout.removeWidget(widgetToRemove)
             # remove it from the gui
+            if widgetToRemove != None :
+                widgetToRemove.setParent(None)   
+
+def clear_all_layout(_layout: QLayout, _listToLeave: list[int] = []):
+    """Clear a layout of all its children
+
+    Args:
+        _layout (QLayout): The layout to clear
+        _listToLeave (list[int]): The list of index to leave
+    """
+    lenght = _layout.count()
+    # print( [ [i, type(_layout.itemAt(i).widget())] if _layout.itemAt(i).widget() == None else [i, _layout.itemAt(i).widget().objectName()] for i in range(lenght) ] )
+    for i in reversed(range(lenght)): 
+        if i not in _listToLeave :
+            widgetToRemove = _layout.itemAt(i).widget()
+            _layout.removeWidget(widgetToRemove)
             if widgetToRemove != None :
                 widgetToRemove.setParent(None)   
 

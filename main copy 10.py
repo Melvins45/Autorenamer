@@ -14,7 +14,6 @@ from operator import itemgetter
 import time
 from enum import Enum
 import Action
-import copy
 
 class CategoriesStatus(Enum) :
     NOT_TREATED = 0
@@ -68,7 +67,6 @@ if __name__ == "__main__":
         "categoriesStatus" : [ ],
     })
     window.__setattr__("userActions", [])
-    window.__setattr__("undoActions", [])
     window.__setattr__("filesPreviousNames", [])
     window.__setattr__("filesPreviousObjects", [])
     window.__setattr__("filesPreviousOriginalsNames", [])
@@ -110,33 +108,28 @@ if __name__ == "__main__":
         filesyly = [ gf.get_episode_object(i) for i in filesy ]
         files_names = [ gf.capitalise_all(i['name']) for i in filesyly ]
         files_names = sorted([i for n, i in enumerate(files_names) if i not in files_names[:n]])
-        test_files_names = []
-        [ test_files_names.append(i) for i in files_names if [ j in i for j in files_names ].count(True) < 2 ]
-        files_names = test_files_names
         files_sorted = [ [ j for j in filesyly if i in gf.capitalise_all(j["name"]) ] for i in files_names ]
         files_sorted = [ sorted(i, key=itemgetter('episode')) for i in files_sorted ]
         
         # Put the resulted objects in a state
         if len(window.filesNames) != 0 :
-            window.undoActions.clear()
+            window.undoIndex = -1
             window.userActions.append(Action.Action(Action.TypeActions["BROWSE"], -1, None, {
                 "pathFolder" : window.pathFolder,
                 "filesNames" : window.filesNames.copy(),
-                "filesObjects" : copy.deepcopy(window.filesObjects),
+                "filesObjects" : window.filesObjects.copy(),
                 "filesOriginalsNames" : window.filesOriginalsNames.copy(),
-                "filesOriginalsObjects" : copy.deepcopy(window.filesOriginalsObjects),
+                "filesOriginalsObjects" : window.filesOriginalsObjects.copy(),
                 "canCreateNewFolder" : window.canCreateNewFolder.copy(),
-                "categoriesNamesInputs" : window.categoriesNamesInputs.copy(),
                 "categoriesStatus" : window.categoriesStatus.copy(),
             } ))
         window.pathFolder = _pathFolder
         window.pathFolder = window.pathFolder.replace('/','\\')
         window.filesNames = files_names.copy()
-        window.filesObjects = copy.deepcopy(files_sorted)
+        window.filesObjects = files_sorted.copy()
         window.filesOriginalsNames = window.filesNames.copy()
-        window.filesOriginalsObjects = copy.deepcopy(window.filesObjects)
+        window.filesOriginalsObjects = window.filesObjects.copy()
         window.canCreateNewFolder = [ False for i in files_names ]
-        window.categoriesNamesInputs = [ QLineEdit(i) for i in files_names ]
         window.categoriesStatus = [ CategoriesStatus.NOT_TREATED.value for i in files_names ]
         # window.originalsCanCreateNewFolder = [ False for i in files_names ]
         
@@ -153,8 +146,8 @@ if __name__ == "__main__":
             _files_sorted (list[list[dict]]): The sorted files to show
         """
         # return
-        # window.categoriesNamesInputs = [ QLineEdit(i) for i in _files_names ] # _files_names.copy()
-        # window.categoryInputs = [ [ QLineEdit(j["final"]) for j in i ] for i in _files_sorted ]
+        window.categoriesNamesInputs = [ QLineEdit(i) for i in _files_names ] # _files_names.copy()
+        window.categoryInputs = [ [ QLineEdit(j["final"]) for j in i ] for i in _files_sorted ]
         gf.clear_layout(window.m_ui.scrollLayout)
         [ show_category(i) for i in range(len(_files_names)) ]
             
@@ -185,34 +178,7 @@ if __name__ == "__main__":
                 window.__getattribute__(f"categoryLayout{_index}").addWidget(window.__getattribute__(f"category{_index}-{j}").m_ui.oddContainer) 
         window.__getattribute__(f'category{_index}').m_ui.categoryLayout.addLayout(window.__getattribute__(f'categoryLayout{_index}'))
         window.__getattribute__(f"category{_index}").m_ui.category.setText(window.filesNames[_index])
-        window.m_ui.scrollLayout.addWidget(window.__getattribute__(f'category{_index}').m_ui.categoryGroup)    
-        
-    def insert_category(_index : int) :
-        """Insert the category to the index 
-
-        Args:
-            _index (int): The index of the category to show
-        """
-        window.__setattr__(f"category{_index}", gf.load_py("renamer"))
-        window.__setattr__(f"categoryLayout{_index}", QVBoxLayout())
-        window.__getattribute__(f"categoryLayout{_index}").setObjectName(f"categoryLayout{_index}")
-        for j in range(len(window.filesObjects[_index])) :
-            window.__setattr__(f"category{_index}-{j}", gf.load_py("renamer"))
-            if j%2 == 0 :
-                window.__getattribute__(f"category{_index}-{j}").m_ui.evenOldName.setText(window.filesOriginalsObjects[_index][j]['original'])
-                window.__getattribute__(f"category{_index}-{j}").m_ui.evenNewName.setText(window.filesObjects[_index][j]['final'])
-                window.__getattribute__(f"category{_index}-{j}").m_ui.evenContainer.setObjectName(f"inputContainer{j}")
-                window.__getattribute__(f"category{_index}-{j}").m_ui.evenNewName.setObjectName(f"inputName")
-                window.__getattribute__(f"categoryLayout{_index}").addWidget(window.__getattribute__(f"category{_index}-{j}").m_ui.evenContainer)
-            else :
-                window.__getattribute__(f"category{_index}-{j}").m_ui.oddOldName.setText(window.filesOriginalsObjects[_index][j]['original'])
-                window.__getattribute__(f"category{_index}-{j}").m_ui.oddNewName.setText(window.filesObjects[_index][j]['final'])
-                window.__getattribute__(f"category{_index}-{j}").m_ui.oddContainer.setObjectName(f"inputContainer{j}")
-                window.__getattribute__(f"category{_index}-{j}").m_ui.oddNewName.setObjectName(f"inputName")
-                window.__getattribute__(f"categoryLayout{_index}").addWidget(window.__getattribute__(f"category{_index}-{j}").m_ui.oddContainer) 
-        window.__getattribute__(f'category{_index}').m_ui.categoryLayout.addLayout(window.__getattribute__(f'categoryLayout{_index}'))
-        window.__getattribute__(f"category{_index}").m_ui.category.setText(window.filesNames[_index])
-        window.m_ui.scrollLayout.insertWidget(_index, window.__getattribute__(f'category{_index}').m_ui.categoryGroup)
+        window.m_ui.scrollLayout.addWidget(window.__getattribute__(f'category{_index}').m_ui.categoryGroup)        
         
     def refresh_category(_index : int) :
         """Refresh a category
@@ -283,8 +249,8 @@ if __name__ == "__main__":
     def should_create_new_folder(_bool : bool, _index : int) :
         
         # Saving previous datas
-        # window.undoIndex = -1
-        # window.userActions.append(Action.Action(Action.TypeActions["CHECK_CAN_CREATE_NEW_FOLDER"], _index, _bool, window.canCreateNewFolder.copy()))
+        window.undoIndex = -1
+        window.userActions.append(Action.Action(Action.TypeActions["CHECK_CAN_CREATE_NEW_FOLDER"], _index, _bool, window.canCreateNewFolder.copy()))
         # window.previousDatas["canCreateNewFolder"].append(Action.Action(Action.TypeActions["CHECK_CAN_CREATE_NEW_FOLDER"], _index, _bool, window.canCreateNewFolder))
         # window.previousCanCreateNewFolder.append(window.canCreateNewFolder)
         
@@ -297,7 +263,10 @@ if __name__ == "__main__":
         Args:
             _first_index (int): The first index of the file object
             _second_index (int): The second index of the file object
-        """ 
+        """       
+        # Saving previous datas
+        window.undoIndex = -1
+        window.userActions.append(Action.Action(Action.TypeActions["CREATE_NEW_FOLDER"], _first_index, window.filesNames[_first_index], window.categoriesStatus.copy()))
          
         if not os.path.exists(os.path.join(window.pathFolder, window.filesNames[_first_index])) :
             os.makedirs(os.path.join(window.pathFolder, window.filesNames[_first_index]))
@@ -315,53 +284,23 @@ if __name__ == "__main__":
         window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"renameAll").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"renameAll").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[1]};" )
         window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"fuseWith").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"fuseWith").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[1]};" )
         
-    def rename_all_categories() :
-        window.undoActions.clear()
-        window.userActions.append(Action.Action(Action.TypeActions["RENAME_ALL_CATEGORIES"], -1, None, window.categoriesStatus.copy()))
-        [ rename_all(i, True) for i in range(len(window.filesNames)) ]
-        
-    def rename_all(_index : int, _concern_all : bool = False) :
+    def rename_all(_index : int) :
+        # os.path.join()
+        # print(os.listdir(window.pathFolder))
+        # print(window.filesOriginalsObjects[_index])
+        # [ print( window.filesOriginalsObjects[_index][j]["original"], window.filesObjects[_index][j]["final"] ) for j in range(len(window.filesObjects[_index])) ]
         
         # Saving previous datas
-        if not _concern_all :
-            window.undoActions.clear()
-            if not window.canCreateNewFolder[_index] :
-                window.undoIndex = -1
-                window.userActions.append(Action.Action(Action.TypeActions["RENAME_ALL"], _index, None, window.categoriesStatus.copy()))
-            else :
-                window.undoIndex = -1
-                window.userActions.append(Action.Action(Action.TypeActions["CREATE_NEW_FOLDER"], _index, window.filesNames[_index], window.categoriesStatus.copy()))
+        if not window.canCreateNewFolder[_index] :
+            window.undoIndex = -1
+            window.userActions.append(Action.Action(Action.TypeActions["RENAME_ALL"], _index, None, window.categoriesStatus.copy()))
         
         [ os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder, window.filesObjects[_index][j]["final"]) ) if not window.canCreateNewFolder[_index] else create_new_folder(_index, j) for j in range(len(window.filesObjects[_index])) ]
         window.categoriesStatus[_index] = CategoriesStatus.TREATED.value
         recolor_category(_index)
         
-    def undo_rename_all_categories() :
-        window.categoriesStatus = window.userActions[-1].datas
-        [ 
-         [ os.rename( os.path.join(window.pathFolder, window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) 
-          ] if not window.canCreateNewFolder[i] else (
-              [ os.rename( os.path.join(os.path.join(window.pathFolder, window.filesNames[i]), window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) ] if os.path.exists(os.path.join(window.pathFolder, window.filesNames[i])) else None
-              ) for i in range(len(window.filesNames)) ]
-        [ recolor_category(i, "GRAY") for i in range(len(window.filesNames)) ]
-        
-    def undo_rename_all() :
-        """Undo the action rename all
-        """        
-        _index = window.userActions[window.undoIndex].concernIndex
-        [ os.rename( os.path.join(window.pathFolder, window.filesObjects[_index][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]) ) for j in range(len(window.filesObjects[_index])) ]
-        window.categoriesStatus[_index] = window.userActions[-1].datas[_index]
-        recolor_category(_index, "GRAY")
-        
-    def undo_create_new_folder() :
-        """Undo the action create new folder and rename all
-        """        
-        _index = window.userActions[window.undoIndex].concernIndex
-        if not os.path.exists(os.path.join(window.pathFolder, window.filesNames[_index])) :
-            return
-        [ os.rename( os.path.join(os.path.join(window.pathFolder, window.filesNames[_index]), window.filesObjects[_index][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]) ) for j in range(len(window.filesObjects[_index])) ]
-        window.categoriesStatus[_index] = window.userActions[-1].datas[_index]
-        recolor_category(_index, "GRAY")
+        # [ shutil.move( os.path.join(window.pathFolder.replace('/','\\'), window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder.replace('/','\\'), window.filesObjects[_index][j]["final"]) ) for j in range(len(window.filesObjects[_index])) ]
+        # [ shutil.move( os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder, window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").text()) ) for j in range(len(window.filesObjects[_index])) ]
         
     def connect_all_widgets():
         """Connect all the widgets of the scrollLayout
@@ -369,7 +308,7 @@ if __name__ == "__main__":
         # QLineEdit.textChanged.
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"category").textChanged, lambda _=0, i=i : window.categoriesNamesInputs[i].setText(_) ) for i in range(len(window.filesNames)) ]
         
-        # [  [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").textChanged, lambda _=0, i=i : set_in_2D_dict("filesObjects", i, j, "final", _) ) for j in range(len(window.filesObjects[i])) ] for i in range(len(window.filesNames))  ]
+        [  [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").textChanged, lambda _=0, i=i : set_in_2D_dict("filesObjects", i, j, "final", _) ) for j in range(len(window.filesObjects[i])) ] for i in range(len(window.filesNames))  ]
         
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"refresh").clicked, lambda _=0, i=i : refresh_data(i)) for i in range(len(window.filesNames)) ]
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"renameAll").clicked, lambda _=0, i=i : rename_all(i)) for i in range(len(window.filesNames)) ]
@@ -401,16 +340,12 @@ if __name__ == "__main__":
         # print(_where, _who)
         
         # Saving the previous data
-        window.undoActions.clear()
         window.undoIndex = -1
-        window.userActions.append(Action.Action(Action.TypeActions["FUSE_WITH"], _who, _where, {
-            "filesNames" : window.filesNames[_who],
-            "filesObjects" : copy.deepcopy(window.filesObjects),
-            "filesOriginalsNames" : window.filesOriginalsNames[_who],
-            "filesOriginalsObjects" : copy.deepcopy(window.filesOriginalsObjects),
-            "canCreateNewFolder" : copy.copy(window.canCreateNewFolder[_who]),
-            "categoriesStatus" : copy.copy(window.categoriesStatus[_who]),
-            "categoriesNamesInputs" : window.categoriesNamesInputs[_who]
+        window.userActions.append(Action.Action(Action.TypeActions["FUSE_WITH"], _where, _who, {
+            "filesNames" : window.filesNames.copy(),
+            "filesObjects" : window.filesObjects.copy(),
+            "filesOriginalsNames" : window.filesOriginalsNames.copy(),
+            "filesOriginalsObjects" : window.filesOriginalsObjects.copy(),
         }))
         window.filesPreviousNames.append(window.filesNames.copy())
         window.filesPreviousObjects.append(window.filesObjects.copy())
@@ -418,9 +353,6 @@ if __name__ == "__main__":
         window.filesPreviousOriginalsObjects.append(window.filesOriginalsObjects.copy())
         
         # Copying the datas of the _who cateory in the _where category
-        # print("userActions before fusing ", window.userActions[-1].datas["filesObjects"][_where])
-        # print("filesObjects before fusing ", window.filesObjects[_where])
-        # print("filesOriginalsObjects before fusing ", window.filesOriginalsObjects[_where])
         window.filesObjects[_where].extend(window.filesObjects[_who])        
         window.filesObjects[_where] = sorted(window.filesObjects[_where], key=itemgetter('episode'))
         window.filesOriginalsObjects[_where].extend(window.filesOriginalsObjects[_who])        
@@ -428,13 +360,10 @@ if __name__ == "__main__":
         res = []
         [ res.append(x) for x in window.filesOriginalsObjects[_where] if x not in res ]
         window.filesOriginalsObjects[_where] = res.copy()
-        # print("userActions after fusing ", window.userActions[-1].datas["filesObjects"][_where])
-        # print("filesObjects after fusing ", window.filesObjects[_where])
-        # print("filesOriginalsObjects after fusing ", window.filesOriginalsObjects[_where])
 
         # Finish with the remaining tasks
         refresh_category(_where)
-        close_group(_who, True)
+        close_group(_who)
         window.fuser.close()
                 
     def fuse_with(_index : int) :
@@ -460,33 +389,29 @@ if __name__ == "__main__":
         # QRadioButton.setText
         # QWidget.
         
-    def close_group(_index : int, isFusing : bool = False) :
+    def close_group(_index : int) :
         """Close and delete a category
 
         Args:
             _index (int): The index of the category
-            isFusing (bool): A bool to know if the user are fusing categories. Defaults to False.
         """        
         # Saving the previous datas
-        if not isFusing :
-            window.undoActions.clear()
-            window.undoIndex = -1
-            window.userActions.append(Action.Action(Action.TypeActions["CLOSE_GROUP"], _index, None, {
-                "filesNames" : copy.copy(window.filesNames[_index]),
-                "filesObjects" : copy.deepcopy(window.filesObjects[_index]),
-                "filesOriginalsNames" : copy.copy(window.filesOriginalsNames[_index]),
-                "filesOriginalsObjects" : copy.deepcopy(window.filesOriginalsObjects[_index]),
-                "canCreateNewFolder" : copy.copy(window.canCreateNewFolder[_index]),
-                "categoriesStatus" : copy.copy(window.categoriesStatus[_index]),
-                "categoriesNamesInputs" : window.categoriesNamesInputs[_index]
-            }))
+        window.undoIndex = -1
+        window.userActions.append(Action.Action(Action.TypeActions["CLOSE_GROUP"], _index, None, {
+            "filesNames" : window.filesNames.copy(),
+            "filesObjects" : window.filesObjects.copy(),
+            "filesOriginalsNames" : window.filesOriginalsNames.copy(),
+            "filesOriginalsObjects" : window.filesOriginalsObjects.copy(),
+            "canCreateNewFolder" : window.canCreateNewFolder.copy(),
+            "categoriesStatus" : window.categoriesStatus.copy(),
+            "categoriesNamesInputs" : window.categoriesNamesInputs.copy()
+        }))
         window.filesPreviousNames.append(window.filesNames.copy())
         window.filesPreviousObjects.append(window.filesObjects.copy())
         window.filesPreviousOriginalsNames.append(window.filesOriginalsNames.copy())
         window.filesPreviousOriginalsObjects.append(window.filesOriginalsObjects.copy())
         window.previousCanCreateNewFolder.append(window.canCreateNewFolder.copy())
         # window.previousOriginalsCanCreateNewFolder.append(window.previousOriginalsCanCreateNewFolder.copy())
-        # print("before delete ", window.filesNames[_index])
         
         # Delete the index of category to close
         # print(_index, len(window.filesNames)-1)
@@ -500,7 +425,6 @@ if __name__ == "__main__":
         del window.categoriesStatus[_index]
         # del window.originalsCanCreateNewFolder[_index]
         # print("After ", _index, len(window.filesNames)-1)
-        # print("after delete ", window.filesNames[_index])
         
         # Remove it from layout
         gf.remove_from_layout(window.m_ui.scrollLayout, _index)
@@ -509,98 +433,52 @@ if __name__ == "__main__":
         connect_all_widgets()
         
     def undo() :
-        if len(window.userActions) == 0 :
-            return
-        match window.userActions[-1].type.name :
+        match window.userActions[window.undoIndex].type.name :
             case "RENAME_ALL" :
-                undo_rename_all()
-            case "REFRESH" :
-                window.filesNames[window.userActions[-1].concernIndex] = window.userActions[-1].datas["filesNames"]
-                window.filesObjects[window.userActions[-1].concernIndex] = window.userActions[-1].datas["filesObjects"]
-                # [window.userActions[-1].concernIndex]
-                [ window.m_ui.scrollLayout.itemAt(window.userActions[-1].concernIndex).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").setText(window.userActions[-1].datas["filesObjects"][j]["final"]) for j in range(len(window.userActions[-1].datas["filesObjects"])) ]
-                # set_in_2D_list("filesObjects", window.userActions[-1].concernIndex, j, fileObject)
-            case "CLOSE_GROUP" :
-                window.filesNames.insert(window.userActions[-1].concernIndex, window.userActions[-1].datas["filesNames"])
-                window.filesObjects.insert(window.userActions[-1].concernIndex, window.userActions[-1].datas["filesObjects"])
-                window.filesOriginalsNames.insert(window.userActions[-1].concernIndex, window.userActions[-1].datas["filesOriginalsNames"])
-                window.filesOriginalsObjects.insert(window.userActions[-1].concernIndex, window.userActions[-1].datas["filesOriginalsObjects"])
-                window.categoriesNamesInputs.insert(window.userActions[-1].concernIndex, window.userActions[-1].datas["categoriesNamesInputs"])
-                window.canCreateNewFolder.insert(window.userActions[-1].concernIndex, window.userActions[-1].datas["canCreateNewFolder"])
-                window.categoriesStatus.insert(window.userActions[-1].concernIndex, window.userActions[-1].datas["categoriesStatus"])
-                insert_category(window.userActions[-1].concernIndex)
-                connect_all_widgets()
-            case "FUSE_WITH" :
-                # print("Undo Fusing")
-                window.filesNames.insert(window.userActions[-1].concernIndex, window.userActions[-1].datas["filesNames"])
-                window.filesObjects = window.userActions[-1].datas["filesObjects"]
-                window.filesOriginalsNames.insert(window.userActions[-1].concernIndex, window.userActions[-1].datas["filesOriginalsNames"])
-                window.filesOriginalsObjects = window.userActions[-1].datas["filesOriginalsObjects"]
-                window.categoriesNamesInputs.insert(window.userActions[-1].concernIndex, window.userActions[-1].datas["categoriesNamesInputs"])
-                window.canCreateNewFolder.insert(window.userActions[-1].concernIndex, window.userActions[-1].datas["canCreateNewFolder"])
-                window.categoriesStatus.insert(window.userActions[-1].concernIndex, window.userActions[-1].datas["categoriesStatus"])
-                insert_category(window.userActions[-1].concernIndex)
-                refresh_category(window.userActions[-1].concernValue)
-                connect_all_widgets()
-            case "CREATE_NEW_FOLDER" :
-                undo_create_new_folder()
-            case "BROWSE" :
-                window.pathFolder = window.userActions[-1].datas["pathFolder"]
-                window.filesNames = window.userActions[-1].datas["filesNames"]
-                window.filesObjects = window.userActions[-1].datas["filesObjects"]
-                window.filesOriginalsNames = window.userActions[-1].datas["filesOriginalsNames"]
-                window.filesOriginalsObjects = window.userActions[-1].datas["filesOriginalsObjects"]
-                window.categoriesNamesInputs = window.userActions[-1].datas["categoriesNamesInputs"]
-                window.canCreateNewFolder = window.userActions[-1].datas["canCreateNewFolder"]
-                window.categoriesStatus = window.userActions[-1].datas["categoriesStatus"]
-                show_categories(window.filesNames, window.filesObjects)
-            case "RENAME_ALL_CATEGORIES" :
-                undo_rename_all_categories()
-            
-        window.undoActions.append(window.userActions[-1])
-        del window.userActions[-1]
+                s = 2
+        
         
     def redo() :
-        previousUndoActions = window.undoActions.copy()
-        if len(window.undoActions) == 0 :
-            return
-        match window.undoActions[-1].type.name :
-            case "RENAME_ALL" :
-                rename_all(window.undoActions[-1].concernIndex)
-            case "REFRESH" :
-                refresh_data(window.undoActions[-1].concernIndex)
-            case "CLOSE_GROUP" :
-                close_group(window.undoActions[-1].concernIndex)
-            case "FUSE_WITH" :
-                fuse_categories(window.undoActions[-1].concernValue, window.undoActions[-1].concernIndex)
-            case "CREATE_NEW_FOLDER" :
-                [ create_new_folder(window.undoActions[-1].concernIndex, j) for j in range(len(window.filesObjects[window.undoActions[-1].concernIndex])) ]
-            case "BROWSE" :
-                compileFiles(window.m_ui.folderNameEdit.text())
-            case "RENAME_ALL_CATEGORIES" :
-                rename_all_categories()
+        if False :
+            print('no')
         
-        window.undoActions = previousUndoActions.copy()
-        del window.undoActions[-1]
-
+        
+        
     def refresh_data(_index : int) :
         """Refresh the datas of the indexed category
 
         Args:
             _index (int): The index of the category in the whole list
         """        
+        # print(_index, window.categoryInputs[_index][0].text())
+        # widget = window.m_ui.scrollLayout.itemAt(_index).widget()
+        # print(widget.findChild(QWidget, "categoryEntity").findChild(QWidget, "inputContainer0").children())
+        # print(widget.findChild(QWidget, "categoryEntity").findChild(QWidget, "categoryContainer").children())
+        # print(widget.children()) #.findChild(QWidget, "inputContainer0").children())
+        # print(widget.findChild(QWidget, "categoryEntity").children()) #.findChild(QWidget, "inputContainer0").children())
+        # for i in range(window.m_ui.scrollLayout.count()): 
+        # for i in reversed(range(window.__getattribute__(f'category{_index}').m_ui.categoryLayout.count())): 
+            # widgetToRemove = window.m_ui.scrollLayout.itemAt(i).widget()
+            # print(widgetToRemove.findChild(QWidget, "categoryEntity").children())
+                #   categoryEntity.categoryContainer.category.text())
+            # QWidget.fi
+            # print(type( widgetToRemove))
+        
+        # print(_index, window.filesObjects[_index])
         if window.filesNames[_index] != window.categoriesNamesInputs[_index].text() :
             # Saving the action
-            window.undoActions.clear()
             window.userActions.append(Action.Action(Action.TypeActions["REFRESH"], _index, window.categoriesNamesInputs[_index].text(), {
-                "filesNames" : copy.deepcopy(window.filesNames[_index]),
-                "filesObjects" : copy.deepcopy(window.filesObjects[_index]),
-                "categoriesNamesInputs" : window.categoriesNamesInputs[_index].text()
+                "filesNames" : window.filesNames.copy(),
+                "filesObjects" : window.filesObjects.copy()
             }))
+            
             categoryObject = gf.get_episode_object(window.categoriesNamesInputs[_index].text(), True)
             window.filesPreviousNames.append(window.filesNames.copy())
             window.filesPreviousObjects.append(window.filesObjects.copy())
             set_in_list("filesNames", _index, window.categoriesNamesInputs[_index].text())
+            # set_in_list("filesNames", _index, categoryObject["name"])
+            window.__setattr__(f"categoryLayout{_index}", QVBoxLayout())
+            window.__getattribute__(f"categoryLayout{_index}").setObjectName(f"categoryLayout{_index}")
             for j in range(len(window.filesObjects[_index])) :
                 fileObject = window.filesObjects[_index][j] # gf.get_episode_object(window.categoryInputs[_index][j].text())
                 fileObject["name"] = categoryObject["name"]
@@ -612,9 +490,10 @@ if __name__ == "__main__":
                     fileObject["type"] = categoryObject["type"]
                 fileObject["final"] = gf.get_name_from_object(fileObject)
                 window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").setText(fileObject["final"])
-                # set_in_2D_list("filesObjects", _index, j, fileObject)
-                window.filesObjects[_index][j] = fileObject
             recolor_category(_index, "GRAY")
+                # print(fileObject['final'], window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").text(), window.filesObjects[_index][j]["final"])
+                # window.categoryInputs[_index][j].setText(fileObject["final"])
+                # set_in_2D_list("filesObjects", _index, j, fileObject)
         
     def refresh_datas() :
         """Refresh all the datas
@@ -652,7 +531,6 @@ if __name__ == "__main__":
     # Create pages and load ui files in it
     window.__setattr__("renamer", gf.load_py("renamer"))
     window.m_ui.parcourirButton.clicked.connect(lambda : get_folder())
-    window.m_ui.renameAllCategoriesButton.clicked.connect(lambda : rename_all_categories())
     window.m_ui.actionParcourir.triggered.connect(lambda : get_folder())
     window.m_ui.actionParcourir.setShortcut('Ctrl+B')
     window.m_ui.actionUndo.triggered.connect(lambda : undo())
@@ -661,8 +539,6 @@ if __name__ == "__main__":
     window.m_ui.actionRedo.setShortcut('Ctrl+Shift+Z')
     window.m_ui.actionTout_Rafra_chir.triggered.connect(lambda : refresh_datas())
     window.m_ui.actionTout_Rafra_chir.setShortcut('Ctrl+R')
-    window.m_ui.actionTout_Renommer.triggered.connect(lambda : rename_all_categories())
-    window.m_ui.actionTout_Renommer.setShortcut('Ctrl+F2')
     window.m_ui.actionQuitter.triggered.connect(lambda : form.quit())
     window.m_ui.actionQuitter.setShortcut('Alt+F4')
     window.__setattr__("loader", QMovie(":/loadSpinner/images/rollingSpinner.gif"))

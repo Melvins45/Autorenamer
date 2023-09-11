@@ -5,12 +5,12 @@ class TypeActions(Enum) :
     RENAME_ALL = 1
     FUSE_WITH = 2
     CREATE_NEW_FOLDER = 3
-    CHECK_CAN_CREATE_NEW_FOLDER = 4
-    CLOSE_GROUP = 5
-    BROWSE = 6
+    CLOSE_GROUP = 4
+    BROWSE = 5
+    RENAME_ALL_CATEGORIES = 6
 
-r = TypeActions["REFRESH"]
-print(type(r), r.name)
+# r = TypeActions["REFRESH"]
+# print(type(r), r.name)
 
 class Action() :
     def __init__(self, _type_action : TypeActions, _index : int, _value : any, _previous_datas : any) -> None:
