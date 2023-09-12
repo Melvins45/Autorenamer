@@ -1,5 +1,5 @@
 from PySide2.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
-    QRect, QSize, QUrl, Qt, QFile, QTextStream, QIODevice, Signal, Qt)
+    QRect, QSize, QUrl, Qt, QFile, QTextStream, QIODevice, Signal, Qt, QThread, SignalInstance)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
     QFontDatabase, QMovie, QIcon, QLinearGradient, QPalette, QPainter, QPixmap,
     QRadialGradient, QResizeEvent)
@@ -12,6 +12,8 @@ import os
 import win32com.client
 from operator import itemgetter
 import time
+
+# QThread.
 
 def resource_path(relative_path):
     try:

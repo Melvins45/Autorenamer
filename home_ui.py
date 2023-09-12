@@ -186,6 +186,7 @@ class Ui_Autorenamer(object):
         self.noFileFound.setStyleSheet(u"border: none;\n"
 "color: rgb(217, 217, 217);font-style: italic;")
         self.noFileFound.setAlignment(Qt.AlignCenter)
+        self.noFileFound.setWordWrap(True)
 
         self.verticalLayout_4.addWidget(self.noFileFound)
 
@@ -219,7 +220,6 @@ class Ui_Autorenamer(object):
         self.menuRenommer.addAction(self.actionUndo)
         self.menuRenommer.addAction(self.actionRedo)
         self.menuRenommer.addSeparator()
-        self.menuRenommer.addAction(self.actionTout_Rafra_chir)
         self.menuRenommer.addAction(self.actionTout_Renommer)
 
         self.retranslateUi(Autorenamer)
@@ -243,7 +243,7 @@ class Ui_Autorenamer(object):
         self.parcourirButton.setText(QCoreApplication.translate("Autorenamer", u"Parcourir", None))
         self.parcourirButton2.setText("")
         self.renameAllCategoriesButton.setText(QCoreApplication.translate("Autorenamer", u"Renommer toutes les cat\u00e9gories", None))
-        self.noFileFound.setText(QCoreApplication.translate("Autorenamer", u"Aucun fichier trouv\u00e9 ...", None))
+        self.noFileFound.setText(QCoreApplication.translate("Autorenamer", u"Aucune cat\u00e9gorie trouv\u00e9e ...", None))
         self.menuFichier.setTitle(QCoreApplication.translate("Autorenamer", u"Fichier", None))
         self.menuRenommer.setTitle(QCoreApplication.translate("Autorenamer", u"Edition", None))
     # retranslateUi

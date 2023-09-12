@@ -47,6 +47,11 @@ def load_py(file_name:str) -> QWidget:
         return _Window()
     else :
         class _Window(QMainWindow):
+            # compiling = [ Signal(str) for i in range(100) ]
+            compiling0 = Signal()
+            compiling1 = Signal()
+            compilingAll = Signal(str)
+                        
             def __init__(self, parent=None):
                 super(_Window, self).__init__(parent)
 
@@ -66,8 +71,17 @@ def autoWrap(_text: str, _inlineCharactersSize: int) -> str :
     """
     return "".join([ _text[i] if i == 0 else _text[i] if i%_inlineCharactersSize != 0 else _text[i]+'\n' for i in range(len(_text)) ])    
     
-# def remove_from_widget(_widget : QWidget) :
-    
+def remove_from_status_bar(_status_bar : QStatusBar, _widget : QWidget) :
+    """Remove a widget from the status bar
+
+    Args:
+        _status_bar (QStatusBar): The status bar from which we remove 
+        _widget (QWidget): The widget to remove
+    """
+    # remove it from the layout list
+    _status_bar.removeWidget(_widget)
+    # remove it from the gui
+    _widget.setParent(None)    
     
 def remove_from_layout(layout: QLayout, _index: int):
     """Remove a widget from his layout

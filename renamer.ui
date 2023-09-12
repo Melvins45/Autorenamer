@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>909</width>
+    <width>1220</width>
     <height>571</height>
    </rect>
   </property>
@@ -798,6 +798,46 @@ border-radius: 0%;padding: 5%;margin: 10% 0%;</string>
       <property name="wordWrap">
        <bool>true</bool>
       </property>
+     </widget>
+     <widget class="QWidget" name="emptySearch" native="true">
+      <property name="geometry">
+       <rect>
+        <x>900</x>
+        <y>160</y>
+        <width>625</width>
+        <height>311</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">border: 2px dashed; border-radius: 10%;
+border-color: rgb(217, 217, 217);</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QLabel" name="noFileFound">
+         <property name="font">
+          <font>
+           <family>MS Shell Dlg 2</family>
+           <pointsize>16</pointsize>
+           <italic>true</italic>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border: none;
+color: rgb(217, 217, 217);font-style: italic;</string>
+         </property>
+         <property name="text">
+          <string>Aucune catégorie trouvée ...</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>

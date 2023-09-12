@@ -25,26 +25,13 @@ class CategoriesColors(Enum) :
     GREEN = ["rgb(28,255,81)", "rgb(126,255,152)"]
     GRAY = ["rgb(217,217,217)", "rgb(241,241,241)"]
 
-class SimpleWorker(QObject) :
+class Worker(QObject) :
     finished = Signal()
     def __init__(self, runner) -> None:
         super().__init__(None)
         self.runner = runner
         
     def run(self) :
-        self.runner()
-        # print("Yes")
-        self.finished.emit()
-
-class TimerWorker(QObject) :
-    finished = Signal()
-    def __init__(self, runner, secs = 2) -> None:
-        super().__init__(None)
-        self.runner = runner
-        self.secs = secs
-        
-    def run(self) :
-        time.sleep(self.secs)
         self.runner()
         # print("Yes")
         self.finished.emit()
@@ -182,41 +169,32 @@ if __name__ == "__main__":
         
         # Init worker and thread
         window.__setattr__("compilerAllThread", QThread())
-        window.__setattr__("compilerAllWorker", SimpleWorker( lambda : window.compilingAll.emit("fr") ))
-        
-        # Connect worker to thread and other relative signals
-        window.compilerAllWorker.moveToThread(window.compilerAllThread) 
-        gf.reconnect(window.compilingAll, lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")))
-        # window.compilingAll.connect( lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")) )
-        gf.reconnect(window.compilerAllThread.started, window.compilerAllWorker.run)
-        # window.compilerAllThread.started.connect(window.compilerAllWorker.run)
-        window.compilerAllWorker.finished.connect(window.compilerAllThread.quit)
-        window.compilerAllWorker.finished.connect( lambda : print(window.m_ui.statusbar.children()) )
-        window.compilerAllWorker.finished.connect(window.compilerAllWorker.deleteLater)
-        window.compilerAllThread.finished.connect(window.compilerAllThread.deleteLater)
+        window.__setattr__("compilerAllWorker", Worker( lambda : window.compilingAll.emit("fr") ))
+        window.compilingAll.connect( lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")) )
         
         for i in range(len(_files_names)) :
             # Init worker and thread
-            window.__setattr__(f"compilerThread{i}", QThread())
-            window.__setattr__(f"compilerWorker{i}", TimerWorker( lambda i=i : window.__getattribute__(f"compiling{i}").emit(), .99*i ))
+            window.__setattr__("compilerThread", QThread())
+            window.__setattr__("compilerWorker", Worker( lambda : window.compiling.emit("fr") ))
             
             # Connect worker to thread and other relative signals
-            window.__getattribute__(f"compilerWorker{i}").moveToThread(window.__getattribute__(f"compilerThread{i}")) 
-            window.__getattribute__(f"compiling{i}").connect( lambda i=i : show_category(i) )
-            window.__getattribute__(f"compilerThread{i}").started.connect(window.__getattribute__(f"compilerWorker{i}").run)
-            window.__getattribute__(f"compilerWorker{i}").finished.connect(window.__getattribute__(f"compilerThread{i}").quit)
-            window.__getattribute__(f"compilerWorker{i}").finished.connect( lambda : print(window.m_ui.statusbar.children()) )
-            window.__getattribute__(f"compilerWorker{i}").finished.connect(window.__getattribute__(f"compilerWorker{i}").deleteLater)
-            window.__getattribute__(f"compilerThread{i}").finished.connect(window.__getattribute__(f"compilerThread{i}").deleteLater)
+            # window.compiling.connect( lambda : compileFiles(window.m_ui.folderNameEdit.text()) )
+            window.compilerWorker.moveToThread(window.compilerThread) 
+            # window.compilerThread.started.connect(window.compilerWorker.finished.emit())
+            window.compilerThread.started.connect(window.compilerWorker.run)
+            # window.compilerThread.started.connect( lambda : print("Yesty") )
+            window.compilerWorker.finished.connect(window.compilerThread.quit)
+            # window.compilerWorker.finished.connect( lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")) )
+            window.compilerWorker.finished.connect( lambda : print(window.m_ui.statusbar.children()) )
+            window.compilerWorker.finished.connect(window.compilerWorker.deleteLater)
+            window.compilerThread.finished.connect(window.compilerThread.deleteLater)
             
             # Start the compiler thread
-            window.__getattribute__(f"compilerThread{i}").start()
-            
-        # Start the compiler thread
-        window.compilerAllThread.start()
+            window.compilerThread.start()
+            show_category(i)
         # [ show_category(i) for i in range(len(_files_names)) ]
             
-        # connect_all_widgets()
+        connect_all_widgets()
         
     def show_category(_index : int) :
         """Show the category 
@@ -224,7 +202,6 @@ if __name__ == "__main__":
         Args:
             _index (int): The index of the category to show
         """
-        print(" Index is ", _index," and len is ", len(window.filesObjects)-1)
         window.__setattr__(f"category{_index}", gf.load_py("renamer"))
         window.__setattr__(f"categoryLayout{_index}", QVBoxLayout())
         window.__getattribute__(f"categoryLayout{_index}").setObjectName(f"categoryLayout{_index}")
@@ -705,26 +682,26 @@ if __name__ == "__main__":
             window.m_ui.statusbar.addWidget(window.renamer.m_ui.loadSpinner)
             compileFiles(window.m_ui.folderNameEdit.text())
             
-            # # Init worker and thread
-            # window.__setattr__("compilerThread", QThread())
-            # # window.__setattr__("compilerWorker", Worker( lambda : print("Yes") ))
-            # window.__setattr__("compilerWorker", Worker( lambda : window.compiling.emit("fr") ))
+            # Init worker and thread
+            window.__setattr__("compilerThread", QThread())
+            # window.__setattr__("compilerWorker", Worker( lambda : print("Yes") ))
+            window.__setattr__("compilerWorker", Worker( lambda : window.compiling.emit("fr") ))
             
-            # # Connect worker to thread and other relative signals
-            # # window.compiling.connect( lambda : compileFiles(window.m_ui.folderNameEdit.text()) )
-            # window.compilerWorker.moveToThread(window.compilerThread) 
-            # # window.compilerThread.started.connect(window.compilerWorker.finished.emit())
-            # window.compilerThread.started.connect(window.compilerWorker.run)
-            # # window.compilerThread.started.connect( lambda : print("Yesty") )
-            # window.compilerWorker.finished.connect(window.compilerThread.quit)
-            # window.compiling.connect( lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")) )
-            # # window.compilerWorker.finished.connect( lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")) )
-            # window.compilerWorker.finished.connect( lambda : print(window.m_ui.statusbar.children()) )
-            # window.compilerWorker.finished.connect(window.compilerWorker.deleteLater)
-            # window.compilerThread.finished.connect(window.compilerThread.deleteLater)
+            # Connect worker to thread and other relative signals
+            # window.compiling.connect( lambda : compileFiles(window.m_ui.folderNameEdit.text()) )
+            window.compilerWorker.moveToThread(window.compilerThread) 
+            # window.compilerThread.started.connect(window.compilerWorker.finished.emit())
+            window.compilerThread.started.connect(window.compilerWorker.run)
+            # window.compilerThread.started.connect( lambda : print("Yesty") )
+            window.compilerWorker.finished.connect(window.compilerThread.quit)
+            window.compiling.connect( lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")) )
+            # window.compilerWorker.finished.connect( lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")) )
+            window.compilerWorker.finished.connect( lambda : print(window.m_ui.statusbar.children()) )
+            window.compilerWorker.finished.connect(window.compilerWorker.deleteLater)
+            window.compilerThread.finished.connect(window.compilerThread.deleteLater)
             
-            # # Start the compiler thread
-            # window.compilerThread.start()
+            # Start the compiler thread
+            window.compilerThread.start()
             
             # print(window.m_ui.statusbar.children())
             # window.m_ui.statusbar.removeWidget(window.m_ui.statusbar.findChild(QWidget, "loadSpinner"))

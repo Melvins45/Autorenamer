@@ -267,10 +267,13 @@ border-color: rgb(217, 217, 217);</string>
 color: rgb(217, 217, 217);font-style: italic;</string>
              </property>
              <property name="text">
-              <string>Aucun fichier trouvé ...</string>
+              <string>Aucune catégorie trouvée ...</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
+             </property>
+             <property name="wordWrap">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -306,7 +309,6 @@ color: rgb(217, 217, 217);font-style: italic;</string>
     <addaction name="actionUndo"/>
     <addaction name="actionRedo"/>
     <addaction name="separator"/>
-    <addaction name="actionTout_Rafra_chir"/>
     <addaction name="actionTout_Renommer"/>
    </widget>
    <addaction name="menuFichier"/>

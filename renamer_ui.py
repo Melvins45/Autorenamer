@@ -19,7 +19,7 @@ class Ui_home(object):
     def setupUi(self, home):
         if not home.objectName():
             home.setObjectName(u"home")
-        home.resize(909, 571)
+        home.resize(1220, 571)
         icon = QIcon()
         icon.addFile(u":/newPrefix/template_icon.png", QSize(), QIcon.Normal, QIcon.Off)
         home.setWindowIcon(icon)
@@ -73,9 +73,9 @@ class Ui_home(object):
         font = QFont()
         font.setPointSize(16)
         self.category.setFont(font)
-        self.category.setStyleSheet(u"background-color: rgb(217, 217, 217);\n"
-"border: none;\n"
-"border-top-left-radius: 16%;")
+        self.category.setStyleSheet(u"border: none;\n"
+"border-top-left-radius: 16%;\n"
+"background: transparent;")
         self.category.setAlignment(Qt.AlignCenter)
 
         self.horizontalLayout_6.addWidget(self.category)
@@ -88,11 +88,11 @@ class Ui_home(object):
         sizePolicy2.setHeightForWidth(self.close.sizePolicy().hasHeightForWidth())
         self.close.setSizePolicy(sizePolicy2)
         self.close.setMinimumSize(QSize(0, 70))
-        self.close.setStyleSheet(u"background-color: rgb(217, 217, 217);\n"
-"border: none;\n"
+        self.close.setStyleSheet(u"border: none;\n"
 "border-top-left-radius: 0%;\n"
 "border-left: 1px solid rgb(0,0,0);\n"
-"margin: 15% 0px;")
+"margin: 15% 0px;\n"
+"background : transparent;")
 
         self.horizontalLayout_6.addWidget(self.close)
 
@@ -370,6 +370,27 @@ class Ui_home(object):
         self.fuserQuestion_2.setStyleSheet(u"text-decoration: none;")
         self.fuserQuestion_2.setAlignment(Qt.AlignLeading|Qt.AlignLeft|Qt.AlignVCenter)
         self.fuserQuestion_2.setWordWrap(True)
+        self.emptySearch = QWidget(self.Awidget)
+        self.emptySearch.setObjectName(u"emptySearch")
+        self.emptySearch.setGeometry(QRect(900, 160, 625, 311))
+        self.emptySearch.setStyleSheet(u"border: 2px dashed; border-radius: 10%;\n"
+"border-color: rgb(217, 217, 217);")
+        self.verticalLayout_5 = QVBoxLayout(self.emptySearch)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.noFileFound = QLabel(self.emptySearch)
+        self.noFileFound.setObjectName(u"noFileFound")
+        font5 = QFont()
+        font5.setFamily(u"MS Shell Dlg 2")
+        font5.setPointSize(16)
+        font5.setItalic(True)
+        self.noFileFound.setFont(font5)
+        self.noFileFound.setStyleSheet(u"border: none;\n"
+"color: rgb(217, 217, 217);font-style: italic;")
+        self.noFileFound.setAlignment(Qt.AlignCenter)
+        self.noFileFound.setWordWrap(True)
+
+        self.verticalLayout_5.addWidget(self.noFileFound)
+
 
         self.verticalLayout.addWidget(self.Awidget)
 
@@ -403,5 +424,6 @@ class Ui_home(object):
         self.ok.setText(QCoreApplication.translate("home", u"OK", None))
         self.categoryRadio.setText(QCoreApplication.translate("home", u"Category Name", None))
         self.fuserQuestion_2.setText(QCoreApplication.translate("home", u"<html><head/><body><p>CategoryName</p></body></html>", None))
+        self.noFileFound.setText(QCoreApplication.translate("home", u"Aucune cat\u00e9gorie trouv\u00e9e ...", None))
     # retranslateUi
 
