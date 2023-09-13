@@ -1,6 +1,6 @@
 import typing
 from PySide2.QtCore import (QCoreApplication, QMetaObject, QObject, QPoint,
-    QRect, QSize, QUrl, Qt, QFile, QTextStream, QIODevice, Signal, QThread)
+    QRect, QSize, QUrl, Qt, QFile, QTextStream, QIODevice, Signal, QThread, SignalInstance)
 from PySide2.QtGui import (QBrush, QColor, QConicalGradient, QCursor, QFont,
     QFontDatabase, QMovie, QIcon, QLinearGradient, QPalette, QPainter, QPixmap,
     QRadialGradient, QResizeEvent)
@@ -180,6 +180,9 @@ if __name__ == "__main__":
         # window.categoryInputs = [ [ QLineEdit(j["final"]) for j in i ] for i in _files_sorted ]
         gf.clear_layout(window.m_ui.scrollLayout)
         
+        # Try to create signals
+        # window.__setattr__("compiling0", SignalInstance())
+        
         # Init worker and thread
         window.__setattr__("compilerAllThread", QThread())
         window.__setattr__("compilerAllWorker", SimpleWorker( lambda : window.compilingAll.emit("fr") ))
@@ -187,9 +190,8 @@ if __name__ == "__main__":
         # Connect worker to thread and other relative signals
         window.compilerAllWorker.moveToThread(window.compilerAllThread) 
         gf.reconnect(window.compilingAll, lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")))
-        # window.compilingAll.connect( lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")) )
-        gf.reconnect(window.compilerAllThread.started, window.compilerAllWorker.run)
-        # window.compilerAllThread.started.connect(window.compilerAllWorker.run)
+        # gf.reconnect(window.compilingAll, lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")) )
+        window.compilerAllThread.started.connect(window.compilerAllWorker.run)
         window.compilerAllWorker.finished.connect(window.compilerAllThread.quit)
         window.compilerAllWorker.finished.connect( lambda : print(window.m_ui.statusbar.children()) )
         window.compilerAllWorker.finished.connect(window.compilerAllWorker.deleteLater)
@@ -199,21 +201,23 @@ if __name__ == "__main__":
             # Init worker and thread
             window.__setattr__(f"compilerThread{i}", QThread())
             window.__setattr__(f"compilerWorker{i}", TimerWorker( lambda i=i : window.__getattribute__(f"compiling{i}").emit(), .99*i ))
+            print("Delay is ", .99*i)
             
             # Connect worker to thread and other relative signals
             window.__getattribute__(f"compilerWorker{i}").moveToThread(window.__getattribute__(f"compilerThread{i}")) 
-            window.__getattribute__(f"compiling{i}").connect( lambda i=i : show_category(i) )
+            gf.reconnect(window.__getattribute__(f"compiling{i}"), lambda i=i : show_category(i) )
             window.__getattribute__(f"compilerThread{i}").started.connect(window.__getattribute__(f"compilerWorker{i}").run)
             window.__getattribute__(f"compilerWorker{i}").finished.connect(window.__getattribute__(f"compilerThread{i}").quit)
             window.__getattribute__(f"compilerWorker{i}").finished.connect( lambda : print(window.m_ui.statusbar.children()) )
             window.__getattribute__(f"compilerWorker{i}").finished.connect(window.__getattribute__(f"compilerWorker{i}").deleteLater)
             window.__getattribute__(f"compilerThread{i}").finished.connect(window.__getattribute__(f"compilerThread{i}").deleteLater)
             
+            if i == len(window.filesNames) - 1 :
+                window.__getattribute__(f"compilerWorker{i}").finished.connect(window.compilerAllThread.start)
+            
             # Start the compiler thread
             window.__getattribute__(f"compilerThread{i}").start()
             
-        # Start the compiler thread
-        window.compilerAllThread.start()
         # [ show_category(i) for i in range(len(_files_names)) ]
             
         # connect_all_widgets()
@@ -702,6 +706,9 @@ if __name__ == "__main__":
         print("It is", window.m_ui.folderNameEdit.text())
         if pathFolder != "" :
             # Add a loader to the status bar
+            window.__setattr__("loader", QMovie(":/loadSpinner/images/rollingSpinner.gif"))
+            window.renamer.m_ui.loader.setMovie(window.loader) 
+            window.loader.start()
             window.m_ui.statusbar.addWidget(window.renamer.m_ui.loadSpinner)
             compileFiles(window.m_ui.folderNameEdit.text())
             
@@ -760,9 +767,9 @@ if __name__ == "__main__":
     window.m_ui.actionTout_Renommer.setShortcut('Ctrl+F2')
     window.m_ui.actionQuitter.triggered.connect(lambda : form.quit())
     window.m_ui.actionQuitter.setShortcut('Alt+F4')
-    window.__setattr__("loader", QMovie(":/loadSpinner/images/rollingSpinner.gif"))
-    window.renamer.m_ui.loader.setMovie(window.loader) 
-    window.loader.start()
+    # window.__setattr__("loader", QMovie(":/loadSpinner/images/rollingSpinner.gif"))
+    # window.renamer.m_ui.loader.setMovie(window.loader) 
+    # window.loader.start()
     # window.m_ui.statusbar.addWidget(window.renamer.m_ui.loadSpinner)
     # gf.set_timeout(lambda : window.m_ui.statusbar.removeWidget(window.renamer.m_ui.loadSpinner), 3)
     

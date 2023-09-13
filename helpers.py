@@ -51,6 +51,7 @@ def load_py(file_name:str) -> QWidget:
             compiling0 = Signal()
             compiling1 = Signal()
             compilingAll = Signal(str)
+            # self.
                         
             def __init__(self, parent=None):
                 super(_Window, self).__init__(parent)
