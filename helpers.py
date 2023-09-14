@@ -6,6 +6,7 @@ from PySide2.QtUiTools import QUiLoader
 import constants as gc
 import re
 import threading
+import math
     
 def load_ui(file_name:str) -> QWidget:
     """Load an ui file in a QWidget and return it
@@ -37,22 +38,30 @@ def load_py(file_name:str) -> QWidget:
     Returns:
         QWidget: The resulted QWidget
     """
-    if file_name != "home" :    
-        class _Window(QWidget):
-            def __init__(self, parent=None):
-                super(_Window, self).__init__(parent)
-
-                self.m_ui = gc.PAGES_UI[file_name]
-                self.m_ui.setupUi(self)
-        return _Window()
-    else :
-        class _Window(QMainWindow):
+    if file_name == "home" :    
+        class _Main_Window(QMainWindow):
             # compiling = [ Signal(str) for i in range(100) ]
-            compiling0 = Signal()
-            compiling1 = Signal()
+            # compiling0 = Signal()
+            # compiling1 = Signal()
             compilingAll = Signal(str)
             # self.
                         
+            def __init__(self, parent=None):
+                super(_Main_Window, self).__init__(parent)
+
+                self.m_ui = gc.PAGES_UI[file_name]
+                self.m_ui.setupUi(self)
+        return _Main_Window()
+    elif "dialog" in file_name :
+        class _Window_Dialog(QDialog):
+            def __init__(self, parent=None):
+                super(_Window_Dialog, self).__init__(parent)
+
+                self.m_ui = gc.PAGES_UI[file_name]
+                self.m_ui.setupUi(self)
+        return _Window_Dialog()
+    else :
+        class _Window(QWidget):
             def __init__(self, parent=None):
                 super(_Window, self).__init__(parent)
 
@@ -280,3 +289,6 @@ def set_timeout(func, sec: int) -> threading.Timer:
     t = threading.Timer(sec, func_wrapper)
     t.start()
     return t
+
+def count_digit(n):
+    return math.floor(math.log10(n)+1)-1 if n != 0 else 1

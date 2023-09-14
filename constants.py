@@ -2,6 +2,7 @@ import os
 import renamer_ui
 import home_ui
 import fuser_ui
+import fuser_dialog_ui
 
 DATETIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 GLOBAL_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -14,7 +15,8 @@ PAGES = {
 PAGES_UI = {
     "renamer" : renamer_ui.Ui_home(),
     "home" : home_ui.Ui_Autorenamer(),
-    "fuser" : fuser_ui.Ui_fuser()
+    "fuser" : fuser_ui.Ui_fuser(),
+    "fuser_dialog" : fuser_dialog_ui.Ui_fuser()
 }
 
 PAGES_INDEX = {

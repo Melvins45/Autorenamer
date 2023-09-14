@@ -527,7 +527,7 @@ background: transparent;</string>
       </property>
       <property name="maximumSize">
        <size>
-        <width>150</width>
+        <width>400</width>
         <height>25</height>
        </size>
       </property>
@@ -570,7 +570,7 @@ background: transparent;</string>
          </property>
          <property name="font">
           <font>
-           <pointsize>14</pointsize>
+           <pointsize>10</pointsize>
            <italic>true</italic>
            <underline>false</underline>
            <strikeout>false</strikeout>

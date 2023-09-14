@@ -19,6 +19,7 @@ class Ui_Autorenamer(object):
         if not Autorenamer.objectName():
             Autorenamer.setObjectName(u"Autorenamer")
         Autorenamer.resize(643, 535)
+        Autorenamer.setMinimumSize(QSize(643, 535))
         icon = QIcon()
         icon.addFile(u":/icon/images/icon_2 - Copie - Copie.png", QSize(), QIcon.Normal, QIcon.Off)
         Autorenamer.setWindowIcon(icon)

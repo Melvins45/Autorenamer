@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'fuser.ui'
+## Form generated from reading UI file 'fuser_dialog.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.2
 ##
@@ -18,7 +18,6 @@ class Ui_fuser(object):
     def setupUi(self, fuser):
         if not fuser.objectName():
             fuser.setObjectName(u"fuser")
-        fuser.setWindowModality(Qt.WindowModal)
         fuser.resize(487, 301)
         fuser.setMinimumSize(QSize(487, 301))
         fuser.setMaximumSize(QSize(487, 301))

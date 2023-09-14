@@ -10,6 +10,12 @@
     <height>535</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>643</width>
+    <height>535</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Auto Renamer</string>
   </property>

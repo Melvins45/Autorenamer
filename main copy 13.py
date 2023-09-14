@@ -47,28 +47,22 @@ class SimpleWorker(QObject) :
         self.runner = runner
         
     def run(self) :
-        if self.runner != None :
-            self.runner()
+        self.runner()
         self.runnerSignal.emit()
         # print("Yes")
         self.finished.emit()
 
 class TimerWorker(QObject) :
     finished = Signal()
-    # finisherSignal = Signal()
-    runnerSignal = Signal()
-    def __init__(self, runner, secs = 2, secsAfterRun = 0) -> None:
+    def __init__(self, runner, secs = 2) -> None:
         super().__init__(None)
         self.runner = runner
         self.secs = secs
-        self.secsAfterRun = secsAfterRun
-    
+        
     def run(self) :
         time.sleep(self.secs)
-        self.runnerSignal.emit()
-        if self.runner != None :
-            self.runner()
-        time.sleep(self.secsAfterRun)
+        self.runner()
+        # print("Yes")
         self.finished.emit()
 
 def resource_path(relative_path):
@@ -130,7 +124,6 @@ if __name__ == "__main__":
     # window.__setattr__("categoryInputsLabels", [])
     window.__setattr__("categoriesStatus", [])
     window.__setattr__("undoIndex", -1)
-    window.__setattr__("indexStartRename", -1)
     
     def activePage(page: str) :
         match page :
@@ -191,46 +184,6 @@ if __name__ == "__main__":
         # print( gf.get_episode_object(gf.get_name_from_object(files_sorted[0][0])) )
         return files_sorted
         
-    def thread_category(_index : int, _max_index : int) :
-        
-        # Init worker and thread
-        window.__setattr__(f"compilerThread{_index}", QThread())
-        window.__setattr__(f"compilerWorker{_index}", TimerWorker( lambda i=_index : None, 0 ))
-        
-        # Connect worker to thread and other relative signals
-        window.__getattribute__(f"compilerWorker{_index}").moveToThread(window.__getattribute__(f"compilerThread{_index}")) 
-        window.__getattribute__(f"compilerWorker{_index}").runnerSignal.connect(lambda i=_index : show_category(i) )
-        window.__getattribute__(f"compilerThread{_index}").started.connect(window.__getattribute__(f"compilerWorker{_index}").run)
-        window.__getattribute__(f"compilerWorker{_index}").finished.connect(window.__getattribute__(f"compilerThread{_index}").quit)
-        window.__getattribute__(f"compilerWorker{_index}").finished.connect(lambda : thread_category(_index+1, _max_index) if _index != _max_index else (window.compilerAllThread.start(), connect_all_widgets()))
-        window.__getattribute__(f"compilerWorker{_index}").finished.connect(window.__getattribute__(f"compilerWorker{_index}").deleteLater)
-        window.__getattribute__(f"compilerThread{_index}").finished.connect(window.__getattribute__(f"compilerThread{_index}").deleteLater)
-        
-        # Start the thread
-        window.__getattribute__(f"compilerThread{_index}").start()
-
-    def toast_ok(_index : int, _message : str) :
-        
-        # Init worker, thread and label
-        window.__setattr__(f"okThread{_index}", QThread())
-        window.__setattr__(f"okWorker{_index}", TimerWorker( lambda i=_index : None, 0, 2 ))
-        window.__setattr__(f"okLabel{_index}", gf.load_py("renamer"))
-        
-        window.__getattribute__(f"okLabel{_index}").m_ui.completedMessage.setObjectName(f"okMessage{_index}")
-        window.__getattribute__(f"okLabel{_index}").m_ui.completedLabel.setText(_message)
-        
-        # Connect worker to thread and other relative signals
-        window.__getattribute__(f"okWorker{_index}").moveToThread(window.__getattribute__(f"okThread{_index}")) 
-        window.__getattribute__(f"okWorker{_index}").runnerSignal.connect(lambda i=_index : window.m_ui.statusbar.addWidget(window.__getattribute__(f"okLabel{_index}").m_ui.completedMessage) )
-        window.__getattribute__(f"okThread{_index}").started.connect(window.__getattribute__(f"okWorker{_index}").run)
-        window.__getattribute__(f"okWorker{_index}").finished.connect(lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, f"okMessage{_index}")))
-        window.__getattribute__(f"okWorker{_index}").finished.connect(window.__getattribute__(f"okThread{_index}").quit)
-        window.__getattribute__(f"okWorker{_index}").finished.connect(window.__getattribute__(f"okWorker{_index}").deleteLater)
-        window.__getattribute__(f"okThread{_index}").finished.connect(window.__getattribute__(f"okThread{_index}").deleteLater)
-        
-        # Start the thread
-        window.__getattribute__(f"okThread{_index}").start()
-        
     def show_categories(_files_names: list[str], _files_sorted: list[list[dict]]) :
         """Show in the GUI the sorted files
 
@@ -239,7 +192,13 @@ if __name__ == "__main__":
             _files_sorted (list[list[dict]]): The sorted files to show
         """
         # return
+        # window.categoriesNamesInputs = [ QLineEdit(i) for i in _files_names ] # _files_names.copy()
+        # window.categoryInputs = [ [ QLineEdit(j["final"]) for j in i ] for i in _files_sorted ]
         gf.clear_layout(window.m_ui.scrollLayout)
+        
+        # Try to create signals
+        # window.__setattr__("compiling0", Signal())
+        # window.__setattr__("compiling1", Signal())
         
         # Init worker and thread
         window.__setattr__("compilerAllThread", QThread())
@@ -248,13 +207,38 @@ if __name__ == "__main__":
         # Connect worker to thread and other relative signals
         window.compilerAllWorker.moveToThread(window.compilerAllThread) 
         gf.reconnect(window.compilingAll, lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")))
+        # gf.reconnect(window.compilingAll, lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")) )
         window.compilerAllThread.started.connect(window.compilerAllWorker.run)
         window.compilerAllWorker.finished.connect(window.compilerAllThread.quit)
+        window.compilerAllWorker.finished.connect( lambda : print(window.m_ui.statusbar.children()) )
         window.compilerAllWorker.finished.connect(window.compilerAllWorker.deleteLater)
         window.compilerAllThread.finished.connect(window.compilerAllThread.deleteLater)
         
-        # Dealing with threads
-        thread_category(0, len(_files_names)-1)
+        for i in range(len(_files_names)) :
+            # Init worker and thread
+            window.__setattr__(f"compilerThread{i}", QThread())
+            # window.__setattr__(f"compilerSignalWorker{i}", Worker(window))
+            window.__setattr__(f"compilerWorker{i}", TimerWorker( lambda i=i : window.__getattribute__(f"compiling{i}").emit(), .99*i ))
+            print("Delay is ", .99*i)
+            
+            # Connect worker to thread and other relative signals
+            window.__getattribute__(f"compilerWorker{i}").moveToThread(window.__getattribute__(f"compilerThread{i}")) 
+            gf.reconnect(window.__getattribute__(f"compiling{i}"), lambda i=i : show_category(i) )
+            window.__getattribute__(f"compilerThread{i}").started.connect(window.__getattribute__(f"compilerWorker{i}").run)
+            window.__getattribute__(f"compilerWorker{i}").finished.connect(window.__getattribute__(f"compilerThread{i}").quit)
+            window.__getattribute__(f"compilerWorker{i}").finished.connect( lambda : print(window.m_ui.statusbar.children()) )
+            window.__getattribute__(f"compilerWorker{i}").finished.connect(window.__getattribute__(f"compilerWorker{i}").deleteLater)
+            window.__getattribute__(f"compilerThread{i}").finished.connect(window.__getattribute__(f"compilerThread{i}").deleteLater)
+            
+            if i == len(window.filesNames) - 1 :
+                window.__getattribute__(f"compilerWorker{i}").finished.connect(window.compilerAllThread.start)
+            
+            # Start the compiler thread
+            window.__getattribute__(f"compilerThread{i}").start()
+            
+        # [ show_category(i) for i in range(len(_files_names)) ]
+            
+        # connect_all_widgets()
         
     def show_category(_index : int) :
         """Show the category 
@@ -262,7 +246,7 @@ if __name__ == "__main__":
         Args:
             _index (int): The index of the category to show
         """
-        # print(" Index is ", _index," and len is ", len(window.filesObjects)-1)
+        print(" Index is ", _index," and len is ", len(window.filesObjects)-1)
         window.__setattr__(f"category{_index}", gf.load_py("renamer"))
         window.__setattr__(f"categoryLayout{_index}", QVBoxLayout())
         window.__getattribute__(f"categoryLayout{_index}").setObjectName(f"categoryLayout{_index}")
@@ -413,18 +397,13 @@ if __name__ == "__main__":
         window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"fuseWith").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"fuseWith").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[1]};" )
         
     def rename_all_categories() :
-        window.indexStartRename = -1
         window.undoActions.clear()
         window.userActions.append(Action.Action(Action.TypeActions["RENAME_ALL_CATEGORIES"], -1, None, window.categoriesStatus.copy()))
         [ rename_all(i, True) for i in range(len(window.filesNames)) ]
         
     def rename_all(_index : int, _concern_all : bool = False) :
         
-        # Testing if the files' category are already renamed
-        if window.categoriesStatus[_index] == CategoriesStatus.TREATED.value :
-            return
-        
-        # Saving previous datas and the first index to rename
+        # Saving previous datas
         if not _concern_all :
             window.undoActions.clear()
             if not window.canCreateNewFolder[_index] :
@@ -433,17 +412,10 @@ if __name__ == "__main__":
             else :
                 window.undoIndex = -1
                 window.userActions.append(Action.Action(Action.TypeActions["CREATE_NEW_FOLDER"], _index, window.filesNames[_index], window.categoriesStatus.copy()))
-        elif window.indexStartRename == -1 :
-            window.indexStartRename = _index
         
         [ os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder, window.filesObjects[_index][j]["final"]) ) if not window.canCreateNewFolder[_index] else create_new_folder(_index, j) for j in range(len(window.filesObjects[_index])) ]
         window.categoriesStatus[_index] = CategoriesStatus.TREATED.value
         recolor_category(_index)
-        if window.indexStartRename == _index and _concern_all :
-            toast_ok(_index, f"Toutes catégories renommées !")
-        elif not _concern_all :
-            toast_ok(_index, f"Renommé avec succès !")
-        # toast_ok(_index, f"{window.filesNames[_index]} renommée avec succès !")
         
     def undo_rename_all_categories() :
         window.categoriesStatus = window.userActions[-1].datas
@@ -451,8 +423,8 @@ if __name__ == "__main__":
          [ os.rename( os.path.join(window.pathFolder, window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) 
           ] if not window.canCreateNewFolder[i] else (
               [ os.rename( os.path.join(os.path.join(window.pathFolder, window.filesNames[i]), window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) ] if os.path.exists(os.path.join(window.pathFolder, window.filesNames[i])) else None
-              ) for i in range(len(window.filesNames)) if window.categoriesStatus[i] != CategoriesStatus.TREATED.value ]
-        [ recolor_category(i, "GRAY") for i in range(len(window.filesNames)) if window.categoriesStatus[i] != CategoriesStatus.TREATED.value ]
+              ) for i in range(len(window.filesNames)) ]
+        [ recolor_category(i, "GRAY") for i in range(len(window.filesNames)) ]
         
     def undo_rename_all() :
         """Undo the action rename all
@@ -552,10 +524,8 @@ if __name__ == "__main__":
         Args:
             _index (int): The index of the category to fuse in another
         """        
-        window.__setattr__('fuser', gf.load_py('fuser_dialog'))
+        window.__setattr__('fuser', gf.load_py('fuser'))
         window.fuser.setFont(QFont(fontDatabase.applicationFontFamilies(0)[0], 10))
-        window.fuser.setWindowFlags(Qt.WindowStaysOnTopHint)
-        window.fuser.setAttribute(Qt.WA_DeleteOnClose)
         radios = []
         for i in range(len(window.filesObjects)) :
             if i != _index :
@@ -564,8 +534,12 @@ if __name__ == "__main__":
                 window.__getattribute__(f"fuser{i}").m_ui.categoryRadio.toggled.connect(lambda _, i=i : radios.append( i ) if _ == True else None) # set_in_dict(radios, window.filesNames[i], _)) # print(window.filesNames[i], _))
                 window.fuser.m_ui.scrollLayout.addWidget(window.__getattribute__(f"fuser{i}").m_ui.categoryRadio)
         window.fuser.m_ui.ok.clicked.connect(lambda _='t' : fuse_categories(radios[-1] if len(radios) != 0 else None, _index))
-        window.fuser.exec_()
-        # window.fuser.show()
+        # window.fuser.m_ui.ok.clicked.connect(lambda _='t', _where = radios[i] if len(radios) != 0 else None : fuse_categories(_where, _index))
+        window.fuser.show()
+        # window.fuser.m_ui.scr
+        # window.fuser.close()
+        # QRadioButton.setText
+        # QWidget.
         
     def close_group(_index : int, isFusing : bool = False) :
         """Close and delete a category
@@ -755,6 +729,33 @@ if __name__ == "__main__":
             window.loader.start()
             window.m_ui.statusbar.addWidget(window.renamer.m_ui.loadSpinner)
             compileFiles(window.m_ui.folderNameEdit.text())
+            
+            # # Init worker and thread
+            # window.__setattr__("compilerThread", QThread())
+            # # window.__setattr__("compilerWorker", Worker( lambda : print("Yes") ))
+            # window.__setattr__("compilerWorker", Worker( lambda : window.compiling.emit("fr") ))
+            
+            # # Connect worker to thread and other relative signals
+            # # window.compiling.connect( lambda : compileFiles(window.m_ui.folderNameEdit.text()) )
+            # window.compilerWorker.moveToThread(window.compilerThread) 
+            # # window.compilerThread.started.connect(window.compilerWorker.finished.emit())
+            # window.compilerThread.started.connect(window.compilerWorker.run)
+            # # window.compilerThread.started.connect( lambda : print("Yesty") )
+            # window.compilerWorker.finished.connect(window.compilerThread.quit)
+            # window.compiling.connect( lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")) )
+            # # window.compilerWorker.finished.connect( lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner")) )
+            # window.compilerWorker.finished.connect( lambda : print(window.m_ui.statusbar.children()) )
+            # window.compilerWorker.finished.connect(window.compilerWorker.deleteLater)
+            # window.compilerThread.finished.connect(window.compilerThread.deleteLater)
+            
+            # # Start the compiler thread
+            # window.compilerThread.start()
+            
+            # print(window.m_ui.statusbar.children())
+            # window.m_ui.statusbar.removeWidget(window.m_ui.statusbar.findChild(QWidget, "loadSpinner"))
+            # window.m_ui.statusbar.findChild(QWidget, "loadSpinner").setParent(None)
+            print(window.m_ui.statusbar.children())
+            # QStatusBar.findChild()
         return pathFolder        
     
     def goToPage(page : str) :
