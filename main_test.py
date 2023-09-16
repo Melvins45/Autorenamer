@@ -35,8 +35,10 @@ def capitalise_all(_string: str, _delimiter: str = " ") -> str :
     """
     return ' '.join([ i.capitalize() for i in _string.split(_delimiter) ])    
 
+
 files = os.listdir(start_dir)#glob(start("*.mp4"))
 final_ep = glob(start("final ep\\*.mp4"))
+
 
 def splittable(_string: str, splitters: list[str]) -> bool :
     """Test if a string is splittable by any of the members of a list of substrings

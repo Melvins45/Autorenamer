@@ -216,7 +216,8 @@ background-color: rgb(241, 241, 241);
 margin-left: 125%;
 margin-right: 125%;
 margin-top: 15%;
-margin-bottom: 15%;</string>
+margin-bottom: 15%;
+</string>
               </property>
               <property name="text">
                <string>Renommer toutes les catégories</string>

@@ -169,6 +169,33 @@ def reconnect(signal, newhandler = None, oldhandler = None):
     if newhandler is not None:
         signal.connect(newhandler)
 
+def escape_before(_str_to_escape: str, _str: str) -> str :
+    """Get the characters behind specified characters within a string
+
+    Args:
+        _str_to_escape (str): The string placed before the researched characters
+        _str (str): The string in which we have to search
+
+    Returns:
+        str: The researched characters
+    """        
+    pattern_string = re.escape(_str_to_escape) + "(.*)"
+    pattern = re.compile(pattern_string)
+    return pattern.findall(_str)[0]
+
+def escape_before_with_pattern(_pattern_to_escape: str, _str: str) -> str :
+    """Get the characters behind a specific pattern within a string
+
+    Args:
+        _pattern_to_escape (str): The pattern to escape
+        _str (str): The string to search in
+
+    Returns:
+        str: The researched characters
+    """    
+    _str_to_escape = re.findall( _pattern_to_escape, _str )
+    return escape_before(_str_to_escape[0] if len(_str_to_escape) != 0 else '' , _str), _str_to_escape[0] if len(_str_to_escape) != 0 else ''
+
 def escape_behind(_str_to_escape: str, _str: str) -> str :
     """Get the characters before specified characters within a string
 
@@ -195,6 +222,9 @@ def escape_behind_with_pattern(_pattern_to_escape: str, _str: str) -> str :
     """    
     _str_to_escape = re.findall( _pattern_to_escape, _str )
     return escape_behind(_str_to_escape[0] if len(_str_to_escape) != 0 else '' , _str), _str_to_escape[0] if len(_str_to_escape) != 0 else ''
+
+def escape_pattern(_pattern_behind: str, _pattern_ahead: str, _str: str) :
+    return escape_behind_with_pattern(_pattern_behind, escape_before_with_pattern(_pattern_ahead, _str)[0])[0]
 
 def capitalise_all(_string: str, _delimiter: str = " ") -> str :
     """Capitalise all substrings splitted from an original string with a delimiter

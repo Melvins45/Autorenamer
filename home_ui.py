@@ -144,7 +144,8 @@ class Ui_Autorenamer(object):
 "margin-left: 125%;\n"
 "margin-right: 125%;\n"
 "margin-top: 15%;\n"
-"margin-bottom: 15%;")
+"margin-bottom: 15%;\n"
+"")
 
         self.horizontalLayout_2.addWidget(self.renameAllCategoriesButton)
 

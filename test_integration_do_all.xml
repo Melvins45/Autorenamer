@@ -1,0 +1,1 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="0" skipped="0" tests="1" time="0.796" timestamp="2023-09-16T13:21:08.926166" hostname="DESKTOP-UNNJVBH"><testcase classname="test_integration_do_all" name="test_integration_do_all" time="0.596" /></testsuite></testsuites>

@@ -248,8 +248,9 @@ def main():
         window.compilerAllThread.finished.connect(window.compilerAllThread.deleteLater)
         
         # Dealing with threads
-        thread_category(0, len(_files_names)-1)
-        # [ show_category(i) for i in range(len(window.filesNames)) ]
+        # thread_category(0, len(_files_names)-1)
+        [ show_category(i) for i in range(len(window.filesNames)) ]
+        connect_all_widgets()
         
     def show_category(_index : int) :
         """Show the category 
@@ -284,6 +285,7 @@ def main():
         window.__getattribute__(f'category{_index}').m_ui.categoryLayout.addLayout(window.__getattribute__(f'categoryLayout{_index}'))
         # window.__getattribute__(f"category{_index}").m_ui.category.setText(window.filesNames[_index])
         window.m_ui.scrollLayout.addWidget(window.__getattribute__(f'category{_index}').m_ui.categoryGroup)
+        # print( "In show categories ", _index, window.m_ui.scrollLayout.itemAt(_index) )    
         
     def insert_category(_index : int) :
         """Insert the category to the index 
@@ -321,6 +323,7 @@ def main():
         # window.__setattr__(f"category{_index}", gf.load_py("renamer"))
         # gf.c
         # print(window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").children())
+        print("In refresh category ", window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChildren(QWidget, QRegExp(r"^inputContainer\d+$")) )
         gf.clear_layout(window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QVBoxLayout,"categoryLayout"))
         [ window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, f"inputContainer{j}").deleteLater() for j in range(len(window.userActions[-1].datas["filesObjects"][_index])) ]
         [ window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, f"inputContainer{j}").setParent(None) for j in range(len(window.userActions[-1].datas["filesObjects"][_index])) ]
@@ -400,7 +403,6 @@ def main():
             _first_index (int): The first index of the file object
             _second_index (int): The second index of the file object
         """ 
-         
         if not os.path.exists(os.path.join(window.pathFolder, window.filesNames[_first_index])) :
             os.makedirs(os.path.join(window.pathFolder, window.filesNames[_first_index]))
         os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_first_index][_second_index]["original"]), os.path.join(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0]), window.filesObjects[_first_index][_second_index]["final"]) )
@@ -447,10 +449,10 @@ def main():
         [ os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder, window.filesObjects[_index][j]["final"]) ) if not window.canCreateNewFolder[_index] else create_new_folder(_index, j) for j in range(len(window.filesObjects[_index])) ]
         window.categoriesStatus[_index] = CategoriesStatus.TREATED.value
         recolor_category(_index)
-        if window.indexStartRename == _index and _concern_all :
-            toast_ok(_index, f"Toutes catégories renommées !")
-        elif not _concern_all :
-            toast_ok(_index, f"Renommé avec succès !")
+        # if window.indexStartRename == _index and _concern_all :
+            # toast_ok(_index, f"Toutes catégories renommées !")
+        # elif not _concern_all :
+            # toast_ok(_index, f"Renommé avec succès !")
         # toast_ok(_index, f"{window.filesNames[_index]} renommée avec succès !")
         
     def undo_rename_all_categories() :
@@ -515,7 +517,7 @@ def main():
         """
         if _where == None :
             # print(_where, _who)
-            window.fuser.close()
+            # window.fuser.close()
             return
         # print(_where, _who)
         
@@ -537,14 +539,14 @@ def main():
         window.filesObjects[_where] = sorted(window.filesObjects[_where], key=itemgetter('episode'))
         window.filesOriginalsObjects[_where].extend(window.filesOriginalsObjects[_who])        
         window.filesOriginalsObjects[_where] = sorted(window.filesOriginalsObjects[_where], key=itemgetter('episode'))
-        res = []
-        [ res.append(x) for x in window.filesOriginalsObjects[_where] if x not in res ]
-        window.filesOriginalsObjects[_where] = res.copy()
+        # res = []
+        # [ res.append(x) for x in window.filesOriginalsObjects[_where] if x not in res ]
+        # window.filesOriginalsObjects[_where] = res.copy()
 
         # Finish with the remaining tasks
         refresh_category(_where)
         close_group(_who, True)
-        window.fuser.close()
+        # window.fuser.close()
                 
     def fuse_with(_index : int) :
         """Open a popup widget to pick a category to fuse the given one in
@@ -566,7 +568,7 @@ def main():
                 window.__getattribute__(f"fuser{i}").m_ui.categoryRadio.toggled.connect(lambda _, i=i : radios.append( i ) if _ == True else None) # set_in_dict(radios, window.filesNames[i], _)) # print(window.filesNames[i], _))
                 window.fuser.m_ui.scrollLayout.addWidget(window.__getattribute__(f"fuser{i}").m_ui.categoryRadio)
         window.fuser.m_ui.ok.clicked.connect(lambda _='t' : fuse_categories(radios[-1] if len(radios) != 0 else None, _index))
-        window.fuser.exec_()
+        # window.fuser.exec_()
         # window.fuser.show()
         
     def close_group(_index : int, isFusing : bool = False) :
@@ -713,6 +715,7 @@ def main():
         # print( [ len(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChildren(QWidget, QRegExp("^inputContainer\d+$"))) for i in range(len(window.filesObjects)) ] )
         # QLayout.
         # print( [ len(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChildren(QWidget, "inputContainer")) for i in range(len(window.filesObjects)) ] )
+        # print("In refresh_data", window.categoriesNamesInputs[_index].text() )
         if window.filesNames[_index] != window.categoriesNamesInputs[_index].text() :
             # Saving the action
             window.undoActions.clear()
