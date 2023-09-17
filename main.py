@@ -123,6 +123,7 @@ def main():
     # window.__setattr__("categoryInputsLabels", [])
     window.__setattr__("categoriesStatus", [])
     window.__setattr__("undoIndex", -1)
+    window.__setattr__("indexToaster", 0)
     window.__setattr__("hadShownAll", False)
     window.__setattr__("indexStartRename", -1)
     
@@ -206,6 +207,8 @@ def main():
     def toast_ok(_index : int, _message : str) :
         
         # Init worker, thread and label
+        _index = window.indexToaster
+        window.indexToaster += 1
         window.__setattr__(f"okThread{_index}", QThread())
         window.__setattr__(f"okWorker{_index}", TimerWorker( lambda i=_index : None, 0, 2 ))
         window.__setattr__(f"okLabel{_index}", gf.load_py("renamer"))
@@ -224,6 +227,30 @@ def main():
         
         # Start the thread
         window.__getattribute__(f"okThread{_index}").start()
+        
+    def toast_error(_index : int, _message : str) :
+        
+        # Init worker, thread and label
+        _index = window.indexToaster
+        window.indexToaster += 1
+        window.__setattr__(f"errorThread{_index}", QThread())
+        window.__setattr__(f"errorWorker{_index}", TimerWorker( lambda i=_index : None, 0, 2 ))
+        window.__setattr__(f"errorLabel{_index}", gf.load_py("renamer"))
+        
+        window.__getattribute__(f"errorLabel{_index}").m_ui.errorMessage.setObjectName(f"errorMessage{_index}")
+        window.__getattribute__(f"errorLabel{_index}").m_ui.errorLabel.setText(_message)
+        
+        # Connect worker to thread and other relative signals
+        window.__getattribute__(f"errorWorker{_index}").moveToThread(window.__getattribute__(f"errorThread{_index}")) 
+        window.__getattribute__(f"errorWorker{_index}").runnerSignal.connect(lambda i=_index : window.m_ui.statusbar.addWidget(window.__getattribute__(f"errorLabel{_index}").m_ui.errorMessage) )
+        window.__getattribute__(f"errorThread{_index}").started.connect(window.__getattribute__(f"errorWorker{_index}").run)
+        window.__getattribute__(f"errorWorker{_index}").finished.connect(lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, f"errorMessage{_index}")))
+        window.__getattribute__(f"errorWorker{_index}").finished.connect(window.__getattribute__(f"errorThread{_index}").quit)
+        window.__getattribute__(f"errorWorker{_index}").finished.connect(window.__getattribute__(f"errorWorker{_index}").deleteLater)
+        window.__getattribute__(f"errorThread{_index}").finished.connect(window.__getattribute__(f"errorThread{_index}").deleteLater)
+        
+        # Start the thread
+        window.__getattribute__(f"errorThread{_index}").start()
         
     def show_categories(_files_names: list[str], _files_sorted: list[list[dict]]) :
         """Show in the GUI the sorted files
@@ -322,6 +349,8 @@ def main():
         # gf.c
         # print(window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").children())
         gf.clear_layout(window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QVBoxLayout,"categoryLayout"))
+        window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, "categoryContainer").deleteLater()
+        window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, "categoryContainer").setParent(None)
         [ window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, f"inputContainer{j}").deleteLater() for j in range(len(window.userActions[-1].datas["filesObjects"][_index])) ]
         [ window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, f"inputContainer{j}").setParent(None) for j in range(len(window.userActions[-1].datas["filesObjects"][_index])) ]
         # return
@@ -485,10 +514,11 @@ def main():
         """        
         # QLineEdit.textChanged.
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"category").textChanged, lambda _=0, i=i : window.categoriesNamesInputs[i].setText(_) ) for i in range(len(window.filesNames)) ]
+        [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"category").editingFinished, lambda _=0, i=i : window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"refresh").animateClick() ) for i in range(len(window.filesNames)) ]
         
         # .m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").
         # QWidget.fi
-        # [  [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").textChanged, lambda _=0, i=i : set_in_2D_dict("filesObjects", i, j, "final", _) ) for j in range(len(window.filesObjects[i])) ] for i in range(len(window.filesNames))  ]
+        [  [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").textChanged, lambda _=0, i=i, j=j : set_in_2D_dict("filesObjects", i, j, "final", _) ) for j in range(len(window.filesObjects[i])) ] for i in range(len(window.filesNames))  ]
         
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"refresh").clicked, lambda _=0, i=i : refresh_data(i)) for i in range(len(window.filesNames)) ]
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"renameAll").clicked, lambda _=0, i=i : rename_all(i)) for i in range(len(window.filesNames)) ]
@@ -552,6 +582,9 @@ def main():
         Args:
             _index (int): The index of the category to fuse in another
         """        
+        if len(window.filesNames) == 1 :
+            toast_error(_index, "Nombre de catégories insuffisant")
+            return
         window.__setattr__('fuser', gf.load_py('fuser_dialog'))
         fontDatabase = QFontDatabase()
         fontDatabase.addApplicationFont(resource_path("fonts\\inder.ttf"))
@@ -614,7 +647,7 @@ def main():
         # Remove it from layout
         gf.remove_from_layout(window.m_ui.scrollLayout, _index)
         if len(window.filesObjects) == 0 :
-            print("Yes")
+            # print("Yes")
             window.__setattr__("emptySearch", gf.load_py("renamer"))
             window.emptySearch.m_ui.noFileFound.setText("Toutes les catégories sont fermées. Annulez votre dernière action ou parcourez un autre dossier pour en afficher")
             window.m_ui.scrollLayout.addWidget(window.emptySearch.m_ui.emptySearch)
@@ -709,10 +742,6 @@ def main():
         Args:
             _index (int): The index of the category in the whole list
         """        
-        # print( [ window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").children() for i in range(len(window.filesObjects)) ] )
-        # print( [ len(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChildren(QWidget, QRegExp("^inputContainer\d+$"))) for i in range(len(window.filesObjects)) ] )
-        # QLayout.
-        # print( [ len(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChildren(QWidget, "inputContainer")) for i in range(len(window.filesObjects)) ] )
         if window.filesNames[_index] != window.categoriesNamesInputs[_index].text() :
             # Saving the action
             window.undoActions.clear()

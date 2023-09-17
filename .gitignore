@@ -3,3 +3,4 @@
 /__pycache__
 /PySide2-Template
 /tests
+*.exe

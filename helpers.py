@@ -247,7 +247,7 @@ def get_name_from_object(_file_object: dict) -> str :
     Returns:
         str: The resulted name
     """
-    return f"{_file_object['name']} S{_file_object['season']:02} EP{_file_object['episode']:02}{ ' '+str(_file_object['year']) if _file_object['year'] != None else ''}{ ' '+str(_file_object['type']).upper() if _file_object['type'] != None else ''}{_file_object['extension']}"    
+    return f"{_file_object['name']} S{_file_object['season']:02} EP{_file_object['episode']:02}{ ' '+str(_file_object['type']).upper() if _file_object['type'] != None else ''}{ ' '+str(_file_object['year']) if _file_object['year'] != None else ''}{_file_object['extension']}"    
 
 def get_episode_object(_file_name: str, general: bool = False) -> dict[str:any] :
     """Construct and send an episode object from the file's name 

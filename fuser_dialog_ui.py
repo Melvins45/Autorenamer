@@ -54,7 +54,7 @@ class Ui_fuser(object):
         self.scrollAreaWidgetContents.setObjectName(u"scrollAreaWidgetContents")
         self.scrollAreaWidgetContents.setGeometry(QRect(0, 0, 469, 189))
         self.scrollLayout = QVBoxLayout(self.scrollAreaWidgetContents)
-        self.scrollLayout.setSpacing(60)
+        self.scrollLayout.setSpacing(6)
         self.scrollLayout.setObjectName(u"scrollLayout")
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
 

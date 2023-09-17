@@ -264,9 +264,9 @@ class Ui_home(object):
         self.horizontalLayout.setStretch(1, 3)
         self.completedMessage = QWidget(self.Awidget)
         self.completedMessage.setObjectName(u"completedMessage")
-        self.completedMessage.setGeometry(QRect(430, 510, 150, 25))
+        self.completedMessage.setGeometry(QRect(430, 510, 150, 20))
         self.completedMessage.setMinimumSize(QSize(0, 0))
-        self.completedMessage.setMaximumSize(QSize(400, 25))
+        self.completedMessage.setMaximumSize(QSize(400, 20))
         self.horizontalLayout_3 = QHBoxLayout(self.completedMessage)
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
         self.horizontalLayout_3.setContentsMargins(10, 0, 0, 0)
@@ -396,6 +396,38 @@ class Ui_home(object):
 
         self.verticalLayout_5.addWidget(self.noFileFound)
 
+        self.errorMessage = QWidget(self.Awidget)
+        self.errorMessage.setObjectName(u"errorMessage")
+        self.errorMessage.setGeometry(QRect(140, 510, 150, 20))
+        self.errorMessage.setMinimumSize(QSize(0, 0))
+        self.errorMessage.setMaximumSize(QSize(300, 20))
+        self.horizontalLayout_7 = QHBoxLayout(self.errorMessage)
+        self.horizontalLayout_7.setObjectName(u"horizontalLayout_7")
+        self.horizontalLayout_7.setContentsMargins(10, 0, 0, 0)
+        self.errorIcon = QLabel(self.errorMessage)
+        self.errorIcon.setObjectName(u"errorIcon")
+        self.errorIcon.setMaximumSize(QSize(20, 20))
+        font7 = QFont()
+        font7.setPointSize(9)
+        self.errorIcon.setFont(font7)
+        self.errorIcon.setStyleSheet(u"color: red;")
+        self.errorIcon.setAlignment(Qt.AlignCenter)
+
+        self.horizontalLayout_7.addWidget(self.errorIcon)
+
+        self.errorLabel = QLabel(self.errorMessage)
+        self.errorLabel.setObjectName(u"errorLabel")
+        sizePolicy3.setHeightForWidth(self.errorLabel.sizePolicy().hasHeightForWidth())
+        self.errorLabel.setSizePolicy(sizePolicy3)
+        self.errorLabel.setFont(font4)
+        self.errorLabel.setStyleSheet(u"text-decoration: none;font-style: italic;color: red;")
+        self.errorLabel.setAlignment(Qt.AlignCenter)
+        self.errorLabel.setWordWrap(False)
+
+        self.horizontalLayout_7.addWidget(self.errorLabel)
+
+        self.horizontalLayout_7.setStretch(0, 1)
+        self.horizontalLayout_7.setStretch(1, 3)
 
         self.verticalLayout.addWidget(self.Awidget)
 
@@ -430,5 +462,7 @@ class Ui_home(object):
         self.categoryRadio.setText(QCoreApplication.translate("home", u"Category Name", None))
         self.fuserQuestion_2.setText(QCoreApplication.translate("home", u"<html><head/><body><p>CategoryName</p></body></html>", None))
         self.noFileFound.setText(QCoreApplication.translate("home", u"Aucune cat\u00e9gorie trouv\u00e9e ...", None))
+        self.errorIcon.setText(QCoreApplication.translate("home", u"X", None))
+        self.errorLabel.setText(QCoreApplication.translate("home", u"Erreur", None))
     # retranslateUi
 
