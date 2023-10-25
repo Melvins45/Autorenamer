@@ -180,7 +180,7 @@ background : transparent;</string>
         </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="categoryMenu" stretch="0,0,0,0,0">
+        <layout class="QVBoxLayout" name="categoryMenu" stretch="0,0,0,0,0,0">
          <item>
           <widget class="QPushButton" name="refresh">
            <property name="sizePolicy">
@@ -247,6 +247,33 @@ border-radius: 15%;padding: 5%;</string>
            </property>
            <property name="text">
             <string>Fusionner avec</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="renameInAscendingOrder">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>16</pointsize>
+            </font>
+           </property>
+           <property name="autoFillBackground">
+            <bool>false</bool>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">background-color: rgb(241, 241, 241);
+border: none;
+border-radius: 15%;padding: 5%;</string>
+           </property>
+           <property name="text">
+            <string>Renommage 
+croissant</string>
            </property>
           </widget>
          </item>
@@ -929,6 +956,45 @@ color: rgb(217, 217, 217);font-style: italic;</string>
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="layoutWidget_2">
+      <property name="geometry">
+       <rect>
+        <x>360</x>
+        <y>330</y>
+        <width>174</width>
+        <height>62</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <item>
+        <widget class="QCheckBox" name="renameInAscendingOrder_2">
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Renommage</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="renameInAscendingOrderFollow_2">
+         <property name="font">
+          <font>
+           <pointsize>16</pointsize>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">border: none;padding-right: 56px;</string>
+         </property>
+         <property name="text">
+          <string>croissant</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>
@@ -961,7 +1027,7 @@ color: rgb(217, 217, 217);font-style: italic;</string>
    <slot>animateClick()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>310</x>
+     <x>287</x>
      <y>65</y>
     </hint>
     <hint type="destinationlabel">

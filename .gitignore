@@ -4,4 +4,4 @@
 /PySide2-Template
 /tests
 *.exe
-main copy*.py
+main *.py

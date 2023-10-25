@@ -11,7 +11,7 @@ QPushButton:pressed{
     font-size: 12px;
 }
 
-QPushButton#createNewFolderFollow:pressed{
+QPushButton#createNewFolderFollow:pressed, QPushButton#renameInAscendingOrderFollow:pressed{
     font-size: 16px;
 }
 

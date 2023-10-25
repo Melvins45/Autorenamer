@@ -139,6 +139,18 @@ class Ui_home(object):
 
         self.categoryMenu.addWidget(self.fuseWith)
 
+        self.renameInAscendingOrder = QPushButton(self.categoryGroup)
+        self.renameInAscendingOrder.setObjectName(u"renameInAscendingOrder")
+        sizePolicy2.setHeightForWidth(self.renameInAscendingOrder.sizePolicy().hasHeightForWidth())
+        self.renameInAscendingOrder.setSizePolicy(sizePolicy2)
+        self.renameInAscendingOrder.setFont(font)
+        self.renameInAscendingOrder.setAutoFillBackground(False)
+        self.renameInAscendingOrder.setStyleSheet(u"background-color: rgb(241, 241, 241);\n"
+"border: none;\n"
+"border-radius: 15%;padding: 5%;")
+
+        self.categoryMenu.addWidget(self.renameInAscendingOrder)
+
         self.verticalLayout_4 = QVBoxLayout()
         self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.createNewFolder = QCheckBox(self.categoryGroup)
@@ -428,6 +440,25 @@ class Ui_home(object):
 
         self.horizontalLayout_7.setStretch(0, 1)
         self.horizontalLayout_7.setStretch(1, 3)
+        self.layoutWidget_2 = QWidget(self.Awidget)
+        self.layoutWidget_2.setObjectName(u"layoutWidget_2")
+        self.layoutWidget_2.setGeometry(QRect(360, 330, 174, 62))
+        self.verticalLayout_7 = QVBoxLayout(self.layoutWidget_2)
+        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.verticalLayout_7.setContentsMargins(0, 0, 0, 0)
+        self.renameInAscendingOrder_2 = QCheckBox(self.layoutWidget_2)
+        self.renameInAscendingOrder_2.setObjectName(u"renameInAscendingOrder_2")
+        self.renameInAscendingOrder_2.setFont(font)
+
+        self.verticalLayout_7.addWidget(self.renameInAscendingOrder_2)
+
+        self.renameInAscendingOrderFollow_2 = QPushButton(self.layoutWidget_2)
+        self.renameInAscendingOrderFollow_2.setObjectName(u"renameInAscendingOrderFollow_2")
+        self.renameInAscendingOrderFollow_2.setFont(font)
+        self.renameInAscendingOrderFollow_2.setStyleSheet(u"border: none;padding-right: 56px;")
+
+        self.verticalLayout_7.addWidget(self.renameInAscendingOrderFollow_2)
+
 
         self.verticalLayout.addWidget(self.Awidget)
 
@@ -446,6 +477,8 @@ class Ui_home(object):
         self.refresh.setText(QCoreApplication.translate("home", u"Rafra\u00eechir", None))
         self.renameAll.setText(QCoreApplication.translate("home", u"Tout renommer", None))
         self.fuseWith.setText(QCoreApplication.translate("home", u"Fusionner avec", None))
+        self.renameInAscendingOrder.setText(QCoreApplication.translate("home", u"Renommage \n"
+"croissant", None))
         self.createNewFolder.setText(QCoreApplication.translate("home", u"Cr\u00e9er un", None))
         self.createNewFolderFollow.setText(QCoreApplication.translate("home", u"   nouveau dossier", None))
         self.oddOldName.setText(QCoreApplication.translate("home", u"<html><head/><body><p>Ancien nom </p></body></html>", None))
@@ -464,5 +497,7 @@ class Ui_home(object):
         self.noFileFound.setText(QCoreApplication.translate("home", u"Aucune cat\u00e9gorie trouv\u00e9e ...", None))
         self.errorIcon.setText(QCoreApplication.translate("home", u"X", None))
         self.errorLabel.setText(QCoreApplication.translate("home", u"Erreur", None))
+        self.renameInAscendingOrder_2.setText(QCoreApplication.translate("home", u"Renommage", None))
+        self.renameInAscendingOrderFollow_2.setText(QCoreApplication.translate("home", u"croissant", None))
     # retranslateUi
 

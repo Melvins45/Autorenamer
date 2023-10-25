@@ -389,11 +389,11 @@ def main():
         """
         window.__getattribute__(_list)[_first_index][_second_index] = _value
         
-    def set_in_2D_dict(_list: list, _first_index : int, _second_index : int, _key : any, _value : any) :
+    def set_in_2D_dict(_list: str, _first_index : int, _second_index : int, _key : any, _value : any) :
         """Set the value at the index in a specific 2D list of dictionaries of window
 
         Args:
-            _list (list): The name of the list in window
+            _list (str): The name of the list in window
             _first_index (int): The first index in the first dimension
             _second_index (int): The second index in the second dimension
             _key (any): The key to set
@@ -512,18 +512,24 @@ def main():
     def connect_all_widgets():
         """Connect all the widgets of the scrollLayout
         """        
-        # QLineEdit.textChanged.
+        # Connect the categories' names inputs to our state
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"category").textChanged, lambda _=0, i=i : window.categoriesNamesInputs[i].setText(_) ) for i in range(len(window.filesNames)) ]
+        
+        # Connect the editingFinished signal of categories' names inputs to the click of the refresh button of the category
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"category").editingFinished, lambda _=0, i=i : window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"refresh").animateClick() ) for i in range(len(window.filesNames)) ]
         
-        # .m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").
-        # QWidget.fi
+        # Connect the categories' items inputs to our state
         [  [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").textChanged, lambda _=0, i=i, j=j : set_in_2D_dict("filesObjects", i, j, "final", _) ) for j in range(len(window.filesObjects[i])) ] for i in range(len(window.filesNames))  ]
         
+        # Connect the returnPressed of each category item input to the focus of the next
+        [  [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").returnPressed, lambda _=0, i=i, j=j : window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j+1}").findChild(QWidget, "inputName").setFocus() if j+1 < len(window.filesObjects[i]) else None ) for j in range(len(window.filesObjects[i])) ] for i in range(len(window.filesNames))  ]
+        
+        # Connect each category button to his function
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"refresh").clicked, lambda _=0, i=i : refresh_data(i)) for i in range(len(window.filesNames)) ]
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"renameAll").clicked, lambda _=0, i=i : rename_all(i)) for i in range(len(window.filesNames)) ]
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"fuseWith").clicked, lambda _=0, i=i : fuse_with(i)) for i in range(len(window.filesNames)) ]
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"createNewFolder").toggled, lambda _, i=i : should_create_new_folder(_,i)) for i in range(len(window.filesNames)) ]
+        [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"renameInAscendingOrder").clicked, lambda _=0, i=i : rename_in_ascending_order(i)) for i in range(len(window.filesNames)) ]
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"close").clicked, lambda _=0, i=i : close_group(i)) for i in range(len(window.filesNames)) ]
                 
     def set_in_dict(_dict : list[dict], _key : str, _value : any) :
@@ -655,6 +661,22 @@ def main():
         # Reconnect all widgets
         connect_all_widgets()
         
+    def rename_in_ascending_order(_index: int) :
+        """Rename a category in the ascending order
+
+        Args:
+            _index (int): The index of the category
+        """
+        window.undoActions.clear()
+        window.undoIndex = -1
+        window.userActions.append(Action.Action(Action.TypeActions["RENAME_IN_ASCENDING_ORDER"], _index, None, {
+            "filesObjects" : copy.deepcopy(window.filesObjects[_index]),
+        }))
+        [ set_in_2D_dict("filesObjects", _index, j, "episode", j+1) for j in range(len(window.filesObjects[_index])) ]
+        [ set_in_2D_dict("filesObjects", _index, j, "final", gf.get_name_from_object(window.filesObjects[_index][j])) for j in range(len(window.filesObjects[_index])) ]
+        refresh_category(_index)
+        connect_all_widgets()
+        
     def undo() :
         if len(window.userActions) == 0 :
             return
@@ -705,6 +727,12 @@ def main():
                 show_categories(window.filesNames, window.filesObjects)
             case "RENAME_ALL_CATEGORIES" :
                 undo_rename_all_categories()
+            case "RENAME_IN_ASCENDING_ORDER" :
+                window.filesObjects[window.userActions[-1].concernIndex] = window.userActions[-1].datas["filesObjects"]
+                refresh_category(window.userActions[-1].concernIndex)
+                # window.m_ui.scrollLayout.itemAt(window.userActions[-1].concernIndex).widget().findChild(QWidget,"renameInAscendingOrder").animateClick()
+                # QCheckBox.isChecked
+                connect_all_widgets()
             
         window.undoActions.append(window.userActions[-1])
         del window.userActions[-1]
@@ -728,6 +756,8 @@ def main():
                 compileFiles(window.m_ui.folderNameEdit.text())
             case "RENAME_ALL_CATEGORIES" :
                 rename_all_categories()
+            case "RENAME_IN_ASCENDING_ORDER" :
+                rename_in_ascending_order(window.userActions[-1].concernIndex)
         
         window.undoActions = previousUndoActions.copy()
         del window.undoActions[-1]

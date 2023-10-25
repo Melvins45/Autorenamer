@@ -6,8 +6,9 @@ class TypeActions(Enum) :
     FUSE_WITH = 2
     CREATE_NEW_FOLDER = 3
     CLOSE_GROUP = 4
-    BROWSE = 5
-    RENAME_ALL_CATEGORIES = 6
+    RENAME_IN_ASCENDING_ORDER = 5
+    BROWSE = 6
+    RENAME_ALL_CATEGORIES = 7
 
 # r = TypeActions["REFRESH"]
 # print(type(r), r.name)

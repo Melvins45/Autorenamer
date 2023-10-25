@@ -261,8 +261,11 @@ def get_episode_object(_file_name: str, general: bool = False) -> dict[str:any] 
     """
     # print(_file_name)
     _file_namey, _str_escaped = escape_behind_with_pattern( r'\..{1,4}$', _file_name )  
-    list1 = re.findall( r'\d+', _file_namey )
-    set1 = [i for n, i in enumerate(list1) if i not in list1[:n]]
+    listNums = re.findall( r'\d+', _file_namey )
+    listNumsInBrackets = re.findall( r'\d+', ''.join(re.findall( r'\(\d+\)', _file_namey )) )
+    numsNotInBrackets = []
+    [ numsNotInBrackets.append(i) for i in listNums if i not in listNumsInBrackets or ( i in listNumsInBrackets and numsNotInBrackets.count(i) < listNums.count(i)-listNumsInBrackets.count(i) ) ]
+    set1 = [i for n, i in enumerate(numsNotInBrackets) if i not in numsNotInBrackets[:n]]
     year = [ int(i) for i in set1 if int(i) > 2000 ]
     nums1 = [ int(i) for i in set1 if int(i) < 100 ]
     rowsy1 = re.findall( r'[@a-zA-Z0-9]+', _file_namey )
@@ -286,7 +289,7 @@ def get_episode_object(_file_name: str, general: bool = False) -> dict[str:any] 
     # rowysy1 = ' '.join(re.findall( r'[a-zA-Z]+', rowysy1 ))
 
     return {
-        "name" : rowysy1,
+        "name" : rowysy1 if rowysy1 != '' else "None",
         "season" : 0 if len(nums1) == 0 else 1 if len(nums1) == 1 and not general else nums1[0],
         "episode" : nums1[0] if len(nums1) == 1 else nums1[1] if len(nums1) != 0 else 1,
         "nums1" : nums1,
@@ -294,7 +297,7 @@ def get_episode_object(_file_name: str, general: bool = False) -> dict[str:any] 
         "type" : None if len(type1) == 0 else type1[0], 
         "original" : _file_name,
         "final" : get_name_from_object({
-            "name" : rowysy1,
+            "name" : rowysy1 if rowysy1 != '' else "None",
             "season" : 0 if len(nums1) == 0 else 1 if len(nums1) == 1 and not general else nums1[0],
             "episode" : nums1[0] if len(nums1) == 1 else nums1[1] if len(nums1) != 0 else 1,
             "nums1" : nums1,
