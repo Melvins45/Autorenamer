@@ -42,10 +42,10 @@ background-color: rgb(255, 242, 175);</string>
      <widget class="QWidget" name="categoryGroup" native="true">
       <property name="geometry">
        <rect>
-        <x>30</x>
-        <y>30</y>
+        <x>20</x>
+        <y>10</y>
         <width>511</width>
-        <height>281</height>
+        <height>371</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -180,7 +180,7 @@ background : transparent;</string>
         </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="categoryMenu" stretch="0,0,0,0,0,0">
+        <layout class="QVBoxLayout" name="categoryMenu" stretch="0,0,0,0,0,0,0">
          <item>
           <widget class="QPushButton" name="refresh">
            <property name="sizePolicy">
@@ -303,6 +303,37 @@ croissant</string>
              </property>
              <property name="text">
               <string>   nouveau dossier</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_7">
+           <item>
+            <widget class="QCheckBox" name="divideBySeasons">
+             <property name="font">
+              <font>
+               <pointsize>16</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Diviser par</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="divideBySeasonsFollow">
+             <property name="font">
+              <font>
+               <pointsize>16</pointsize>
+              </font>
+             </property>
+             <property name="styleSheet">
+              <string notr="true">border: none;padding-right: 40px;</string>
+             </property>
+             <property name="text">
+              <string>saisons</string>
              </property>
             </widget>
            </item>
@@ -622,8 +653,8 @@ background: transparent;</string>
      <widget class="QPushButton" name="pushButton">
       <property name="geometry">
        <rect>
-        <x>100</x>
-        <y>350</y>
+        <x>40</x>
+        <y>510</y>
         <width>75</width>
         <height>23</height>
        </rect>
@@ -956,30 +987,30 @@ color: rgb(217, 217, 217);font-style: italic;</string>
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="layoutWidget_2">
+     <widget class="QWidget" name="layoutWidget_3">
       <property name="geometry">
        <rect>
-        <x>360</x>
-        <y>330</y>
+        <x>940</x>
+        <y>500</y>
         <width>174</width>
-        <height>62</height>
+        <height>87</height>
        </rect>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_7">
+      <layout class="QVBoxLayout" name="verticalLayout_8">
        <item>
-        <widget class="QCheckBox" name="renameInAscendingOrder_2">
+        <widget class="QCheckBox" name="divideBySeasons_2">
          <property name="font">
           <font>
            <pointsize>16</pointsize>
           </font>
          </property>
          <property name="text">
-          <string>Renommage</string>
+          <string>Diviser par</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="renameInAscendingOrderFollow_2">
+        <widget class="QPushButton" name="divideBySeasonsFollow_2">
          <property name="font">
           <font>
            <pointsize>16</pointsize>
@@ -989,7 +1020,7 @@ color: rgb(217, 217, 217);font-style: italic;</string>
           <string notr="true">border: none;padding-right: 56px;</string>
          </property>
          <property name="text">
-          <string>croissant</string>
+          <string>saisons</string>
          </property>
         </widget>
        </item>
@@ -1011,12 +1042,12 @@ color: rgb(217, 217, 217);font-style: italic;</string>
    <slot>animateClick()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>529</x>
-     <y>223</y>
+     <x>519</x>
+     <y>269</y>
     </hint>
     <hint type="destinationlabel">
-     <x>529</x>
-     <y>192</y>
+     <x>519</x>
+     <y>238</y>
     </hint>
    </hints>
   </connection>
@@ -1031,8 +1062,24 @@ color: rgb(217, 217, 217);font-style: italic;</string>
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>426</x>
-     <y>62</y>
+     <x>416</x>
+     <y>42</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>divideBySeasonsFollow</sender>
+   <signal>clicked()</signal>
+   <receiver>divideBySeasons</receiver>
+   <slot>animateClick()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>473</x>
+     <y>324</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>480</x>
+     <y>304</y>
     </hint>
    </hints>
   </connection>

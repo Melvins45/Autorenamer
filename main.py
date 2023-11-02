@@ -109,6 +109,7 @@ def main():
     })
     window.__setattr__("userActions", [])
     window.__setattr__("undoActions", [])
+    window.__setattr__("previousPathFolders", [])
     window.__setattr__("filesPreviousNames", [])
     window.__setattr__("filesPreviousObjects", [])
     window.__setattr__("filesPreviousOriginalsNames", [])
@@ -118,6 +119,7 @@ def main():
     window.__setattr__("categoriesNamesInputs", [])
     window.__setattr__("categoryInputs", [])
     window.__setattr__("canCreateNewFolder", [])
+    window.__setattr__("canDivideBySeason", [])
     # window.__setattr__("originalsCanCreateNewFolder", [])
     window.__setattr__("previousCanCreateNewFolder", [])
     # window.__setattr__("categoryInputsLabels", [])
@@ -167,6 +169,7 @@ def main():
                 "filesOriginalsNames" : window.filesOriginalsNames.copy(),
                 "filesOriginalsObjects" : copy.deepcopy(window.filesOriginalsObjects),
                 "canCreateNewFolder" : window.canCreateNewFolder.copy(),
+                "canDivideBySeason" : window.canDivideBySeason.copy(),
                 "categoriesNamesInputs" : window.categoriesNamesInputs.copy(),
                 "categoriesStatus" : window.categoriesStatus.copy(),
             } ))
@@ -177,6 +180,7 @@ def main():
         window.filesOriginalsNames = window.filesNames.copy()
         window.filesOriginalsObjects = copy.deepcopy(window.filesObjects)
         window.canCreateNewFolder = [ False for i in files_names ]
+        window.canDivideBySeason = [ False for i in files_names ]
         window.categoriesNamesInputs = [ QLineEdit(i) for i in files_names ]
         window.categoriesStatus = [ CategoriesStatus.NOT_TREATED.value for i in files_names ]
         # window.originalsCanCreateNewFolder = [ False for i in files_names ]
@@ -339,20 +343,27 @@ def main():
         window.__getattribute__(f"category{_index}").m_ui.category.setText(window.filesNames[_index])
         window.m_ui.scrollLayout.insertWidget(_index, window.__getattribute__(f'category{_index}').m_ui.categoryGroup)
         
-    def refresh_category(_index : int) :
+    def refresh_category(_index : int, _last_datas : list[dict] = None) :
         """Refresh a category
 
         Args:
             _index (int): The index of the category to show
+            _last_datas (list[dict]): The previous datas of the files objects
         """
         # window.__setattr__(f"category{_index}", gf.load_py("renamer"))
         # gf.c
         # print(window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").children())
+        
+        # Clear the layout of the category
         gf.clear_layout(window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QVBoxLayout,"categoryLayout"))
+        
+        # Delete the category container
         window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, "categoryContainer").deleteLater()
         window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, "categoryContainer").setParent(None)
-        [ window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, f"inputContainer{j}").deleteLater() for j in range(len(window.userActions[-1].datas["filesObjects"][_index])) ]
-        [ window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, f"inputContainer{j}").setParent(None) for j in range(len(window.userActions[-1].datas["filesObjects"][_index])) ]
+        
+        # Delete all the previous input containers
+        [ window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, f"inputContainer{j}").deleteLater() for j in range(len( window.userActions[-1].datas["filesObjects"][_index] if _last_datas == None else _last_datas )) ]
+        [ window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, f"inputContainer{j}").setParent(None) for j in range(len( window.userActions[-1].datas["filesObjects"][_index] if _last_datas == None else _last_datas )) ]
         # return
         window.__setattr__(f"categoryLayout{_index}", QVBoxLayout())
         window.__getattribute__(f"categoryLayout{_index}").setObjectName(f"categoryLayout{_index}")
@@ -422,6 +433,11 @@ def main():
         # Updating new datas
         window.canCreateNewFolder[_index] = _bool
         
+    def should_divide_by_seasons(_bool: bool, _index: int) :
+        
+        # Updating new datas
+        window.canDivideBySeason[_index] = _bool
+        
     def create_new_folder(_first_index : int, _second_index : int) :
         """Create a new folder and paste a file in
 
@@ -472,6 +488,8 @@ def main():
                 window.userActions.append(Action.Action(Action.TypeActions["CREATE_NEW_FOLDER"], _index, window.filesNames[_index], window.categoriesStatus.copy()))
         elif window.indexStartRename == -1 :
             window.indexStartRename = _index
+        
+        # Do the divide by seasons treatment
         
         [ os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder, window.filesObjects[_index][j]["final"]) ) if not window.canCreateNewFolder[_index] else create_new_folder(_index, j) for j in range(len(window.filesObjects[_index])) ]
         window.categoriesStatus[_index] = CategoriesStatus.TREATED.value
@@ -529,6 +547,7 @@ def main():
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"renameAll").clicked, lambda _=0, i=i : rename_all(i)) for i in range(len(window.filesNames)) ]
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"fuseWith").clicked, lambda _=0, i=i : fuse_with(i)) for i in range(len(window.filesNames)) ]
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"createNewFolder").toggled, lambda _, i=i : should_create_new_folder(_,i)) for i in range(len(window.filesNames)) ]
+        [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"divideBySeasons").toggled, lambda _, i=i : should_divide_by_seasons(_,i)) for i in range(len(window.filesNames)) ]
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"renameInAscendingOrder").clicked, lambda _=0, i=i : rename_in_ascending_order(i)) for i in range(len(window.filesNames)) ]
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"close").clicked, lambda _=0, i=i : close_group(i)) for i in range(len(window.filesNames)) ]
                 
@@ -674,7 +693,7 @@ def main():
         }))
         [ set_in_2D_dict("filesObjects", _index, j, "episode", j+1) for j in range(len(window.filesObjects[_index])) ]
         [ set_in_2D_dict("filesObjects", _index, j, "final", gf.get_name_from_object(window.filesObjects[_index][j])) for j in range(len(window.filesObjects[_index])) ]
-        refresh_category(_index)
+        refresh_category(_index, window.userActions[-1].datas["filesObjects"])
         connect_all_widgets()
         
     def undo() :
@@ -810,23 +829,33 @@ def main():
         Returns:
             str: The path of the folder
         """
-        # print("It was", pathFolder)
-        # QFileDialog.getExistingDirectory()
-        if not os.path.exists( rf'{window.m_ui.folderNameEdit.text()}' ) :
+        canCompile = True
+        
+        # Check if the actual pathFolder exists or is already used
+        if not os.path.exists( rf'{window.m_ui.folderNameEdit.text()}' ) or window.previousPathFolders[-1] == window.m_ui.folderNameEdit.text() :
             pathFolder = QFileDialog.getExistingDirectory(None, gc.FILE_DIALOG_CAPTION, 
                                                         "C:/Users/user/Downloads/Telegram Desktop")
                                                         #   os.path.join( pathToMyDocuments ))
             window.m_ui.folderNameEdit.setText(pathFolder)
-        pathFolder = rf'{window.m_ui.folderNameEdit.text()}'
-        print("It is", window.m_ui.folderNameEdit.text())
-        if pathFolder != "" :
+            window.previousPathFolders.append(pathFolder)
+            canCompile = pathFolder != ""
+        
+        if canCompile :
+            # Get the actual pathFolder and actualise the list of previouspathFolders
+            pathFolder = rf'{window.m_ui.folderNameEdit.text()}'
+            window.previousPathFolders.append(pathFolder)
+            print("It is", window.m_ui.folderNameEdit.text())
+           
             # Add a loader to the status bar
             window.__setattr__("loader", QMovie(":/loadSpinner/images/rollingSpinner.gif"))
             window.renamer.m_ui.loader.setMovie(window.loader) 
             window.loader.start()
             window.m_ui.statusbar.addWidget(window.renamer.m_ui.loadSpinner)
+           
+            # Compile with the actual pathFolder
             compileFiles(window.m_ui.folderNameEdit.text())
-        return pathFolder        
+            
+            return pathFolder        
     
     def goToPage(page : str) :
         """Go to the specified page

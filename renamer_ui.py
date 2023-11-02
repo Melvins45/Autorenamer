@@ -33,7 +33,7 @@ class Ui_home(object):
 "background-color: rgb(255, 242, 175);")
         self.categoryGroup = QWidget(self.Awidget)
         self.categoryGroup.setObjectName(u"categoryGroup")
-        self.categoryGroup.setGeometry(QRect(30, 30, 511, 281))
+        self.categoryGroup.setGeometry(QRect(20, 10, 511, 371))
         sizePolicy = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -168,6 +168,24 @@ class Ui_home(object):
 
 
         self.categoryMenu.addLayout(self.verticalLayout_4)
+
+        self.verticalLayout_7 = QVBoxLayout()
+        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
+        self.divideBySeasons = QCheckBox(self.categoryGroup)
+        self.divideBySeasons.setObjectName(u"divideBySeasons")
+        self.divideBySeasons.setFont(font)
+
+        self.verticalLayout_7.addWidget(self.divideBySeasons)
+
+        self.divideBySeasonsFollow = QPushButton(self.categoryGroup)
+        self.divideBySeasonsFollow.setObjectName(u"divideBySeasonsFollow")
+        self.divideBySeasonsFollow.setFont(font)
+        self.divideBySeasonsFollow.setStyleSheet(u"border: none;padding-right: 40px;")
+
+        self.verticalLayout_7.addWidget(self.divideBySeasonsFollow)
+
+
+        self.categoryMenu.addLayout(self.verticalLayout_7)
 
         self.verticalSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
 
@@ -309,7 +327,7 @@ class Ui_home(object):
         self.horizontalLayout_3.setStretch(1, 3)
         self.pushButton = QPushButton(self.Awidget)
         self.pushButton.setObjectName(u"pushButton")
-        self.pushButton.setGeometry(QRect(100, 350, 75, 23))
+        self.pushButton.setGeometry(QRect(40, 510, 75, 23))
         self.pushButton.setStyleSheet(u"border: none;\n"
 "border-left: 1px solid rgb(0,0,0);\n"
 "margin: 5px 0px;")
@@ -440,24 +458,24 @@ class Ui_home(object):
 
         self.horizontalLayout_7.setStretch(0, 1)
         self.horizontalLayout_7.setStretch(1, 3)
-        self.layoutWidget_2 = QWidget(self.Awidget)
-        self.layoutWidget_2.setObjectName(u"layoutWidget_2")
-        self.layoutWidget_2.setGeometry(QRect(360, 330, 174, 62))
-        self.verticalLayout_7 = QVBoxLayout(self.layoutWidget_2)
-        self.verticalLayout_7.setObjectName(u"verticalLayout_7")
-        self.verticalLayout_7.setContentsMargins(0, 0, 0, 0)
-        self.renameInAscendingOrder_2 = QCheckBox(self.layoutWidget_2)
-        self.renameInAscendingOrder_2.setObjectName(u"renameInAscendingOrder_2")
-        self.renameInAscendingOrder_2.setFont(font)
+        self.layoutWidget_3 = QWidget(self.Awidget)
+        self.layoutWidget_3.setObjectName(u"layoutWidget_3")
+        self.layoutWidget_3.setGeometry(QRect(940, 500, 174, 87))
+        self.verticalLayout_8 = QVBoxLayout(self.layoutWidget_3)
+        self.verticalLayout_8.setObjectName(u"verticalLayout_8")
+        self.verticalLayout_8.setContentsMargins(0, 0, 0, 0)
+        self.divideBySeasons_2 = QCheckBox(self.layoutWidget_3)
+        self.divideBySeasons_2.setObjectName(u"divideBySeasons_2")
+        self.divideBySeasons_2.setFont(font)
 
-        self.verticalLayout_7.addWidget(self.renameInAscendingOrder_2)
+        self.verticalLayout_8.addWidget(self.divideBySeasons_2)
 
-        self.renameInAscendingOrderFollow_2 = QPushButton(self.layoutWidget_2)
-        self.renameInAscendingOrderFollow_2.setObjectName(u"renameInAscendingOrderFollow_2")
-        self.renameInAscendingOrderFollow_2.setFont(font)
-        self.renameInAscendingOrderFollow_2.setStyleSheet(u"border: none;padding-right: 56px;")
+        self.divideBySeasonsFollow_2 = QPushButton(self.layoutWidget_3)
+        self.divideBySeasonsFollow_2.setObjectName(u"divideBySeasonsFollow_2")
+        self.divideBySeasonsFollow_2.setFont(font)
+        self.divideBySeasonsFollow_2.setStyleSheet(u"border: none;padding-right: 56px;")
 
-        self.verticalLayout_7.addWidget(self.renameInAscendingOrderFollow_2)
+        self.verticalLayout_8.addWidget(self.divideBySeasonsFollow_2)
 
 
         self.verticalLayout.addWidget(self.Awidget)
@@ -466,6 +484,7 @@ class Ui_home(object):
         self.retranslateUi(home)
         self.createNewFolderFollow.clicked.connect(self.createNewFolder.animateClick)
         self.category.editingFinished.connect(self.refresh.animateClick)
+        self.divideBySeasonsFollow.clicked.connect(self.divideBySeasons.animateClick)
 
         QMetaObject.connectSlotsByName(home)
     # setupUi
@@ -481,6 +500,8 @@ class Ui_home(object):
 "croissant", None))
         self.createNewFolder.setText(QCoreApplication.translate("home", u"Cr\u00e9er un", None))
         self.createNewFolderFollow.setText(QCoreApplication.translate("home", u"   nouveau dossier", None))
+        self.divideBySeasons.setText(QCoreApplication.translate("home", u"Diviser par", None))
+        self.divideBySeasonsFollow.setText(QCoreApplication.translate("home", u"saisons", None))
         self.oddOldName.setText(QCoreApplication.translate("home", u"<html><head/><body><p>Ancien nom </p></body></html>", None))
         self.oddNewName.setText(QCoreApplication.translate("home", u"Nouveau nom", None))
         self.evenOldName.setText(QCoreApplication.translate("home", u"<html><head/><body><p>Ancien nom</p></body></html>", None))
@@ -497,7 +518,7 @@ class Ui_home(object):
         self.noFileFound.setText(QCoreApplication.translate("home", u"Aucune cat\u00e9gorie trouv\u00e9e ...", None))
         self.errorIcon.setText(QCoreApplication.translate("home", u"X", None))
         self.errorLabel.setText(QCoreApplication.translate("home", u"Erreur", None))
-        self.renameInAscendingOrder_2.setText(QCoreApplication.translate("home", u"Renommage", None))
-        self.renameInAscendingOrderFollow_2.setText(QCoreApplication.translate("home", u"croissant", None))
+        self.divideBySeasons_2.setText(QCoreApplication.translate("home", u"Diviser par", None))
+        self.divideBySeasonsFollow_2.setText(QCoreApplication.translate("home", u"saisons", None))
     # retranslateUi
 

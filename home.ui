@@ -392,5 +392,21 @@ color: rgb(217, 217, 217);font-style: italic;</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>folderNameEdit</sender>
+   <signal>returnPressed()</signal>
+   <receiver>parcourirButton</receiver>
+   <slot>animateClick()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>317</x>
+     <y>103</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>345</x>
+     <y>100</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>

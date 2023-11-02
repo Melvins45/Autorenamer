@@ -11,7 +11,21 @@ QPushButton:pressed{
     font-size: 12px;
 }
 
-QPushButton#createNewFolderFollow:pressed, QPushButton#renameInAscendingOrderFollow:pressed{
+QCheckBox::indicator {
+    /* width: 13px; */
+    /* height: 13px; */
+    /* border-radius: 5px; */
+    border : 1px solid black;
+    width : 11px;
+    height : 11px;
+    border-radius : 2px;
+}
+
+QCheckBox::indicator:checked {
+    image: url(:/icon/images/th-removebg-preview.png);
+}
+
+QPushButton#createNewFolderFollow:pressed, QPushButton#renameInAscendingOrderFollow:pressed, QPushButton#divideBySeasonsFollow:pressed{
     font-size: 16px;
 }
 

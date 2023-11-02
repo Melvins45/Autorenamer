@@ -226,6 +226,7 @@ class Ui_Autorenamer(object):
 
         self.retranslateUi(Autorenamer)
         self.parcourirButton2.pressed.connect(self.parcourirButton.animateClick)
+        self.folderNameEdit.returnPressed.connect(self.parcourirButton.animateClick)
 
         QMetaObject.connectSlotsByName(Autorenamer)
     # setupUi
