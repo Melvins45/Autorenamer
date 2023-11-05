@@ -7,7 +7,7 @@ def test_integration_do_all(main, qtbot) :
     # Take a pathFolder for the test
     # test_folder = r"C:\Users\user\Downloads\Telegram Desktop\Cheat Kusushi No Slow Life"
     # test_folder = r"C:\Users\user\Downloads\Telegram Desktop\Cheat Kusushi No Slow Life - Copie (4)"
-    test_folder = r"C:\Users\user\Downloads\Telegram Desktop\Cheat Kusushi No Slow Life - Copie (5)"
+    test_folder = r"C:\Users\user\Downloads\Telegram Desktop\a - Copie (5)"
     result_files = len(os.listdir(test_folder))
     
     # Browse a folder
@@ -36,14 +36,14 @@ def test_integration_do_all(main, qtbot) :
     actualNumberOfInputsNamesInCategory0 = len(main.m_ui.scrollLayout.itemAt(0).widget().findChild(QWidget,"categoryEntity").findChildren(QWidget, QRegExp(r"^inputContainer\d+$")))
     assert previousNumberOfCategories == actualNumberOfCategories + 1
     assert actualNumberOfInputsNamesInCategory0 == sum(previousNumberOfInputsNamesInCategories0And1)
-    assert os.listdir(test_folder)[0] == "Cheat Kusushi No Slow Life S1 VOSTFR"
-    assert os.listdir(os.path.join(test_folder, os.listdir(test_folder)[0]))[0] == "Cheat Kusushi No Slow Life S01 EP01 VOSTFR.mkv"
+    assert os.listdir(test_folder)[0] == "Heaven Official Blessing S1 VOSTFR"
+    assert os.listdir(os.path.join(test_folder, os.listdir(test_folder)[0]))[0] == "Heaven Official Blessing S01 EP07 VOSTFR.flv"
     
 def test_integration_without_create_folder(main, qtbot) :
     # Take a pathFolder for the test
     # test_folder = r"C:\Users\user\Downloads\Telegram Desktop\Cheat Kusushi No Slow Life"
     # test_folder = r"C:\Users\user\Downloads\Telegram Desktop\Cheat Kusushi No Slow Life - Copie (4)"
-    test_folder = r"C:\Users\user\Downloads\Telegram Desktop\Cheat Kusushi No Slow Life - Copie (6)"
+    test_folder = r"C:\Users\user\Downloads\Telegram Desktop\a - Copie (6)"
     result_files = len(os.listdir(test_folder))
     
     # Browse a folder
@@ -71,4 +71,4 @@ def test_integration_without_create_folder(main, qtbot) :
     actualNumberOfInputsNamesInCategory0 = len(main.m_ui.scrollLayout.itemAt(0).widget().findChild(QWidget,"categoryEntity").findChildren(QWidget, QRegExp(r"^inputContainer\d+$")))
     assert previousNumberOfCategories == actualNumberOfCategories + 1
     assert actualNumberOfInputsNamesInCategory0 == sum(previousNumberOfInputsNamesInCategories0And1)
-    assert os.listdir(test_folder)[0] == "Cheat Kusushi No Slow Life S01 EP01 VOSTFR.mkv"
+    assert os.listdir(test_folder)[0] == "Heaven Official Blessing S01 EP07 VOSTFR.flv"

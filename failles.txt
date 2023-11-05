@@ -1,6 +1,6 @@
-- Quand le nom de la série a un mot ayant plusieurs occurences ça ne le reprend qu'une fois et ignore toutes les autres occurences dans les objets épisodes 
 - Accents non pris en compte
 
-Done S'il ne reconnait pas bien le numéro de l'épisode, le choisir selon l'ordre alphabétique ou alpha-numérique si possible
-Done Ajouter un signal returnPressed pour passer d'un lineEdit d'une catégorie au suivant 
-Done Reconnaître les chiffres aui correspondent à un fichier double ( c'est-à-dire (1) par exemple qui est situé à la fin des fichiers doubles)
+* Quand le nom de la série a un mot ayant plusieurs occurences ça ne le reprend qu'une fois et ignore toutes les autres occurences dans les objets épisodes 
+* S'il ne reconnait pas bien le numéro de l'épisode, le choisir selon l'ordre alphabétique ou alpha-numérique si possible
+* Ajouter un signal returnPressed pour passer d'un lineEdit d'une catégorie au suivant 
+* Reconnaître les chiffres aui correspondent à un fichier double ( c'est-à-dire (1) par exemple qui est situé à la fin des fichiers doubles)

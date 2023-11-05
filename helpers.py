@@ -277,9 +277,12 @@ def get_episode_object(_file_name: str, general: bool = False) -> dict[str:any] 
     type1 = [ rowsy1[i] for i in range(len(rowsy1))
             if rowsy1[i].lower()  in gc.TYPE_VIDEOS ]
     # rowy1 = [ i for i in row1 if re.search( r'[a-zA-Z]+', i ) != None ]
-    rowy1 = [i for n, i in enumerate(row1) if i not in row1[:n]]
-    rowysy1 = ' '.join(rowy1)
-    # print(row1)
+    
+    # For removing doubles
+    # rowy1 = [i for n, i in enumerate(row1) if i not in row1[:n]]
+
+    # Join all the members of the names'list
+    rowysy1 = ' '.join(row1)
 
     rowysy1, _str_escapedy = escape_behind_with_pattern( r' [sS]\d.*$', rowysy1 )
     rowysy1 = ' '.join(re.findall( r'[a-zA-Z]+', rowysy1 ))

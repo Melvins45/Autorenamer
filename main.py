@@ -185,7 +185,10 @@ def main():
         window.categoriesStatus = [ CategoriesStatus.NOT_TREATED.value for i in files_names ]
         # window.originalsCanCreateNewFolder = [ False for i in files_names ]
         
-        show_categories(files_names, files_sorted)   
+        if len(window.filesObjects) != 0 :
+            show_categories(files_names, files_sorted)
+        else :
+            gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner"))   
         # print(gf.get_name_from_object(files_sorted[0][0]))
         # print( gf.get_episode_object(gf.get_name_from_object(files_sorted[0][0])) )
         return files_sorted
@@ -281,6 +284,7 @@ def main():
         # Dealing with threads
         thread_category(0, len(_files_names)-1)
         # [ show_category(i) for i in range(len(window.filesNames)) ]
+        # connect_all_widgets()
         
     def show_category(_index : int) :
         """Show the category 
@@ -438,6 +442,42 @@ def main():
         # Updating new datas
         window.canDivideBySeason[_index] = _bool
         
+    def divide_by_seasons(_first_index: int, _second_index: int) :
+        """Divide the files by seasons 
+
+        Args:
+            _first_index (int): The first index of the file's object
+            _second_index (int): The second index of the file's object
+        """        
+        
+        season = "S" + f"{window.filesObjects[_first_index][_second_index]['season']:02}"
+            
+        # Test if the season's folder is already created
+        if not os.path.exists(os.path.join(window.pathFolder, season)) :
+            os.makedirs(os.path.join(window.pathFolder, season))
+        
+        # Rename the original file to the compiled name
+        os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_first_index][_second_index]["original"]), os.path.join(window.pathFolder, season, window.filesObjects[_first_index][_second_index]["final"]) )
+        
+    def create_and_divide_by_seasons(_first_index: int, _second_index: int) :
+        """Create a new folder and divide it by season
+
+        Args:
+            _first_index (int): The first index of the file object
+            _second_index (int): The second index of the file object
+        """
+        season = "S" + f"{window.filesObjects[_first_index][_second_index]['season']:02}"
+        # Test if the englobing folder is already created    
+        if not os.path.exists(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0])) :
+            os.makedirs(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0]))
+            
+        # Test if the season's folder is already created
+        if not os.path.exists(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0], season)) :
+            os.makedirs(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0], season))
+        
+        # Rename the original file to the compiled name
+        os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_first_index][_second_index]["original"]), os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0], season, window.filesObjects[_first_index][_second_index]["final"]) )
+        
     def create_new_folder(_first_index : int, _second_index : int) :
         """Create a new folder and paste a file in
 
@@ -446,9 +486,9 @@ def main():
             _second_index (int): The second index of the file object
         """ 
          
-        if not os.path.exists(os.path.join(window.pathFolder, window.filesNames[_first_index])) :
-            os.makedirs(os.path.join(window.pathFolder, window.filesNames[_first_index]))
-        os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_first_index][_second_index]["original"]), os.path.join(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0]), window.filesObjects[_first_index][_second_index]["final"]) )
+        if not os.path.exists(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0])) :
+            os.makedirs(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0]))
+        os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_first_index][_second_index]["original"]), os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0], window.filesObjects[_first_index][_second_index]["final"]) )
         
     def recolor_category(_index : int, _color : str = "GREEN") :
         
@@ -464,11 +504,14 @@ def main():
         window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"refresh").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"refresh").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[1]};" )
         window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"renameAll").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"renameAll").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[1]};" )
         window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"fuseWith").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"fuseWith").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[1]};" )
+        window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"renameInAscendingOrder").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"renameInAscendingOrder").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[1]};" )
         
     def rename_all_categories() :
         window.indexStartRename = -1
         window.undoActions.clear()
-        window.userActions.append(Action.Action(Action.TypeActions["RENAME_ALL_CATEGORIES"], -1, None, window.categoriesStatus.copy()))
+        window.userActions.append(Action.Action(Action.TypeActions["RENAME_ALL_CATEGORIES"], -1, None, { "categoriesStatus" : window.categoriesStatus.copy(),
+          "canDivideBySeason" : window.canDivideBySeason.copy(),
+          "canCreateNewFolder" : window.canCreateNewFolder.copy() }))
         [ rename_all(i, True) for i in range(len(window.filesNames)) ]
         
     def rename_all(_index : int, _concern_all : bool = False) :
@@ -480,18 +523,28 @@ def main():
         # Saving previous datas and the first index to rename
         if not _concern_all :
             window.undoActions.clear()
-            if not window.canCreateNewFolder[_index] :
+            if window.canCreateNewFolder[_index] and window.canDivideBySeason[_index] :
                 window.undoIndex = -1
-                window.userActions.append(Action.Action(Action.TypeActions["RENAME_ALL"], _index, None, window.categoriesStatus.copy()))
+                window.userActions.append(Action.Action(Action.TypeActions["CREATE_AND_DIVIDE_BY_SEASONS"], _index, window.filesNames[_index], { "categoriesStatus" : window.categoriesStatus.copy() }))
+            elif window.canDivideBySeason[_index] :
+                window.undoIndex = -1
+                window.userActions.append(Action.Action(Action.TypeActions["DIVIDE_BY_SEASONS"], _index, window.filesNames[_index], { "categoriesStatus" : window.categoriesStatus.copy() }))
+            elif window.canCreateNewFolder[_index] :
+                window.undoIndex = -1
+                window.userActions.append(Action.Action(Action.TypeActions["CREATE_NEW_FOLDER"], _index, window.filesNames[_index], { "categoriesStatus" : window.categoriesStatus.copy() }))
             else :
                 window.undoIndex = -1
-                window.userActions.append(Action.Action(Action.TypeActions["CREATE_NEW_FOLDER"], _index, window.filesNames[_index], window.categoriesStatus.copy()))
+                window.userActions.append(Action.Action(Action.TypeActions["RENAME_ALL"], _index, None, { "categoriesStatus" : window.categoriesStatus.copy() }))
         elif window.indexStartRename == -1 :
             window.indexStartRename = _index
         
         # Do the divide by seasons treatment
         
-        [ os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder, window.filesObjects[_index][j]["final"]) ) if not window.canCreateNewFolder[_index] else create_new_folder(_index, j) for j in range(len(window.filesObjects[_index])) ]
+        [ create_and_divide_by_seasons(_index, j) if window.canCreateNewFolder[_index] and window.canDivideBySeason[_index] else
+         divide_by_seasons(_index, j) if window.canDivideBySeason[_index] else
+         create_new_folder(_index, j) if window.canCreateNewFolder[_index] 
+         else os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder, window.filesObjects[_index][j]["final"]) ) 
+         for j in range(len(window.filesObjects[_index])) ]
         window.categoriesStatus[_index] = CategoriesStatus.TREATED.value
         recolor_category(_index)
         if window.indexStartRename == _index and _concern_all :
@@ -501,30 +554,75 @@ def main():
         # toast_ok(_index, f"{window.filesNames[_index]} renommée avec succès !")
         
     def undo_rename_all_categories() :
-        window.categoriesStatus = window.userActions[-1].datas
+        # Régler le problème des rename all undo
+        window.categoriesStatus = window.userActions[-1].datas["categoriesStatus"]
+        season = lambda _index, _second_index : "S" + f"{window.filesObjects[_index][_second_index]['season']:02}"
+        
         [ 
-         [ os.rename( os.path.join(window.pathFolder, window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) 
-          ] if not window.canCreateNewFolder[i] else (
-              [ os.rename( os.path.join(os.path.join(window.pathFolder, window.filesNames[i]), window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) ] if os.path.exists(os.path.join(window.pathFolder, window.filesNames[i])) else None
-              ) for i in range(len(window.filesNames)) if window.categoriesStatus[i] != CategoriesStatus.TREATED.value ]
+         # Test if both canCreateNewFolder and canDivideBySeason 's checkboxes are checked
+         (
+        [ os.rename( os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[i])[0], season(i, j), window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) ]
+        if not False in [ os.path.exists(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[i])[0], season(i, j))) for j in range(len(window.filesObjects[i])) ] else None
+        ) if window.userActions[-1].datas["canCreateNewFolder"][i] and window.userActions[-1].datas["canDivideBySeason"][i] else
+         
+         # Else test if canDivideBySeason's checkboxe is checked
+         (
+        [ os.rename( os.path.join(window.pathFolder, season(i,j), window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) ]
+        if not False in [ os.path.exists(os.path.join(window.pathFolder, season(i, j))) for j in range(len(window.filesObjects[i])) ] else None
+        ) if window.userActions[-1].datas["canDivideBySeason"][i] else
+         
+         # Else test if canCreateNewFolder's checkboxe is checked
+         (
+        [ os.rename( os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[i])[0], window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) ]
+        if os.path.exists(os.path.join(window.pathFolder, window.filesNames[i])) else None
+        ) if window.userActions[-1].datas["canCreateNewFolder"][i] else
+         
+         # Else do the normal renaming
+        [ os.rename( os.path.join(window.pathFolder, window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) ]  
+         
+         # Take only indices where the previous categoriesStatus are not treated so that the actual are treated
+        for i in range(len(window.filesNames)) if window.categoriesStatus[i] != CategoriesStatus.TREATED.value ]
+        
         [ recolor_category(i, "GRAY") for i in range(len(window.filesNames)) if window.categoriesStatus[i] != CategoriesStatus.TREATED.value ]
         
     def undo_rename_all() :
         """Undo the action rename all
         """        
-        _index = window.userActions[window.undoIndex].concernIndex
+        _index = window.userActions[-1].concernIndex
         [ os.rename( os.path.join(window.pathFolder, window.filesObjects[_index][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]) ) for j in range(len(window.filesObjects[_index])) ]
-        window.categoriesStatus[_index] = window.userActions[-1].datas[_index]
+        window.categoriesStatus[_index] = window.userActions[-1].datas["categoriesStatus"][_index]
         recolor_category(_index, "GRAY")
         
     def undo_create_new_folder() :
         """Undo the action create new folder and rename all
         """        
-        _index = window.userActions[window.undoIndex].concernIndex
-        if not os.path.exists(os.path.join(window.pathFolder, window.filesNames[_index])) :
+        _index = window.userActions[-1].concernIndex
+        if not os.path.exists(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_index])[0])) :
             return
-        [ os.rename( os.path.join(os.path.join(window.pathFolder, window.filesNames[_index]), window.filesObjects[_index][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]) ) for j in range(len(window.filesObjects[_index])) ]
-        window.categoriesStatus[_index] = window.userActions[-1].datas[_index]
+        [ os.rename( os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_index])[0], window.filesObjects[_index][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]) ) for j in range(len(window.filesObjects[_index])) ]
+        window.categoriesStatus[_index] = window.userActions[-1].datas["categoriesStatus"][_index]
+        recolor_category(_index, "GRAY")
+        
+    def undo_create_and_divide_by_seasons() :
+        _index = window.userActions[-1].concernIndex
+        season = lambda _second_index : "S" + f"{window.filesObjects[_index][_second_index]['season']:02}"
+        
+        if False in [ os.path.exists(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_index])[0], season(j))) for j in range(len(window.filesObjects[_index])) ] :
+            return
+        [ os.rename( os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_index])[0], season(j), window.filesObjects[_index][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]) ) for j in range(len(window.filesObjects[_index])) ]
+        window.categoriesStatus[_index] = window.userActions[-1].datas["categoriesStatus"][_index]
+        recolor_category(_index, "GRAY")
+        
+    def undo_divide_by_seasons() :
+        """Undo the action divide by seasons
+        """        
+        _index = window.userActions[-1].concernIndex
+        season = lambda _second_index : "S" + f"{window.filesObjects[_index][_second_index]['season']:02}"
+        
+        if False in [ os.path.exists(os.path.join(window.pathFolder, season(j))) for j in range(len(window.filesObjects[_index])) ] :
+            return
+        [ os.rename( os.path.join(window.pathFolder, season(j), window.filesObjects[_index][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]) ) for j in range(len(window.filesObjects[_index])) ]
+        window.categoriesStatus[_index] = window.userActions[-1].datas["categoriesStatus"][_index]
         recolor_category(_index, "GRAY")
         
     def connect_all_widgets():
@@ -587,7 +685,7 @@ def main():
             "categoriesNamesInputs" : window.categoriesNamesInputs[_who]
         }))
         
-        # Copying the datas of the _who cateory in the _where category
+        # Copying the datas of the _who category in the _where category
         window.filesObjects[_where].extend(window.filesObjects[_who])        
         window.filesObjects[_where] = sorted(window.filesObjects[_where], key=itemgetter('episode'))
         window.filesOriginalsObjects[_where].extend(window.filesOriginalsObjects[_who])        
@@ -752,6 +850,10 @@ def main():
                 # window.m_ui.scrollLayout.itemAt(window.userActions[-1].concernIndex).widget().findChild(QWidget,"renameInAscendingOrder").animateClick()
                 # QCheckBox.isChecked
                 connect_all_widgets()
+            case "DIVIDE_BY_SEASONS" :
+                undo_divide_by_seasons()
+            case "CREATE_AND_DIVIDE_BY_SEASONS" :
+                undo_create_and_divide_by_seasons()
             
         window.undoActions.append(window.userActions[-1])
         del window.userActions[-1]
@@ -770,13 +872,32 @@ def main():
             case "FUSE_WITH" :
                 fuse_categories(window.undoActions[-1].concernValue, window.undoActions[-1].concernIndex)
             case "CREATE_NEW_FOLDER" :
+                window.undoIndex = -1
+                window.userActions.append(Action.Action(Action.TypeActions["CREATE_NEW_FOLDER"], window.undoActions[-1].concernIndex, window.filesNames[window.undoActions[-1].concernIndex], { "categoriesStatus" : window.categoriesStatus.copy()}))
                 [ create_new_folder(window.undoActions[-1].concernIndex, j) for j in range(len(window.filesObjects[window.undoActions[-1].concernIndex])) ]
+                window.categoriesStatus[window.undoActions[-1].concernIndex] = CategoriesStatus.TREATED.value
+                recolor_category(window.undoActions[-1].concernIndex)
+                toast_ok(window.undoActions[-1].concernIndex, f"Renommé avec succès !")
             case "BROWSE" :
                 compileFiles(window.m_ui.folderNameEdit.text())
             case "RENAME_ALL_CATEGORIES" :
                 rename_all_categories()
             case "RENAME_IN_ASCENDING_ORDER" :
                 rename_in_ascending_order(window.userActions[-1].concernIndex)
+            case "DIVIDE_BY_SEASONS" :
+                window.undoIndex = -1
+                window.userActions.append(Action.Action(Action.TypeActions["DIVIDE_BY_SEASONS"], window.undoActions[-1].concernIndex, window.filesNames[window.undoActions[-1].concernIndex], { "categoriesStatus" : window.categoriesStatus.copy()}))
+                [ divide_by_seasons(window.undoActions[-1].concernIndex, j) for j in range(len(window.filesObjects[window.undoActions[-1].concernIndex])) ]
+                window.categoriesStatus[window.undoActions[-1].concernIndex] = CategoriesStatus.TREATED.value
+                recolor_category(window.undoActions[-1].concernIndex)
+                toast_ok(window.undoActions[-1].concernIndex, f"Renommé avec succès !")
+            case "CREATE_AND_DIVIDE_BY_SEASONS" :
+                window.undoIndex = -1
+                window.userActions.append(Action.Action(Action.TypeActions["CREATE_AND_DIVIDE_BY_SEASONS"], window.undoActions[-1].concernIndex, window.filesNames[window.undoActions[-1].concernIndex], { "categoriesStatus" : window.categoriesStatus.copy()}))
+                [ create_and_divide_by_seasons(window.undoActions[-1].concernIndex, j) for j in range(len(window.filesObjects[window.undoActions[-1].concernIndex])) ]
+                window.categoriesStatus[window.undoActions[-1].concernIndex] = CategoriesStatus.TREATED.value
+                recolor_category(window.undoActions[-1].concernIndex)
+                toast_ok(window.undoActions[-1].concernIndex, f"Renommé avec succès !")
         
         window.undoActions = previousUndoActions.copy()
         del window.undoActions[-1]
@@ -830,9 +951,8 @@ def main():
             str: The path of the folder
         """
         canCompile = True
-        
         # Check if the actual pathFolder exists or is already used
-        if not os.path.exists( rf'{window.m_ui.folderNameEdit.text()}' ) or window.previousPathFolders[-1] == window.m_ui.folderNameEdit.text() :
+        if not os.path.exists( rf'{window.m_ui.folderNameEdit.text()}' ) or ( window.previousPathFolders[-1] == window.m_ui.folderNameEdit.text() if len(window.previousPathFolders) != 0 else False ) :
             pathFolder = QFileDialog.getExistingDirectory(None, gc.FILE_DIALOG_CAPTION, 
                                                         "C:/Users/user/Downloads/Telegram Desktop")
                                                         #   os.path.join( pathToMyDocuments ))
@@ -843,7 +963,8 @@ def main():
         if canCompile :
             # Get the actual pathFolder and actualise the list of previouspathFolders
             pathFolder = rf'{window.m_ui.folderNameEdit.text()}'
-            window.previousPathFolders.append(pathFolder)
+            if window.previousPathFolders[-1] != pathFolder if len(window.previousPathFolders) != 0 else False :
+                window.previousPathFolders.append(pathFolder)
             print("It is", window.m_ui.folderNameEdit.text())
            
             # Add a loader to the status bar

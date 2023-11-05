@@ -8,7 +8,7 @@ def test_refresh(main, qtbot) :
     # Take a pathFolder for the test
     # test_folder = r"C:\Users\user\Downloads\Telegram Desktop\Cheat Kusushi No Slow Life"
     # test_folder = r"C:\Users\user\Downloads\Telegram Desktop\Cheat Kusushi No Slow Life - Copie (4)"
-    test_folder = r"C:\Users\user\Downloads\Telegram Desktop\Cheat Kusushi No Slow Life - Copie (4)"
+    test_folder = r"C:\Users\user\Downloads\Telegram Desktop\a"
     result_files = len(os.listdir(test_folder))
     
     # Try to refresh
@@ -18,4 +18,4 @@ def test_refresh(main, qtbot) :
     qtbot.mouseClick(main.m_ui.scrollLayout.itemAt(0).widget().findChild(QWidget,"refresh"), Qt.LeftButton)
     
     # Verify
-    assert main.m_ui.scrollLayout.itemAt(0).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, "inputContainer0").findChild(QWidget, "inputName").text() == "Cheat Kusushi No Slow Life S03 EP01 VOSTFR.mkv" # main.filesObjects[0][0]["final"]
+    assert main.m_ui.scrollLayout.itemAt(0).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, "inputContainer0").findChild(QWidget, "inputName").text() == "Heaven Official Blessing S03 EP12 VOSTFR.mp4" # main.filesObjects[0][0]["final"]

@@ -1,5 +1,6 @@
 import pytest
 import os
+import time
 from PySide2.QtCore import Qt, QRegExp
 from PySide2.QtWidgets import QWidget
 
@@ -7,7 +8,7 @@ def test_fuse(main, qtbot) :
     # Take a pathFolder for the test
     # test_folder = r"C:\Users\user\Downloads\Telegram Desktop\Cheat Kusushi No Slow Life"
     # test_folder = r"C:\Users\user\Downloads\Telegram Desktop\Cheat Kusushi No Slow Life - Copie (4)"
-    test_folder = r"C:\Users\user\Downloads\Telegram Desktop\Cheat Kusushi No Slow Life - Copie (4)"
+    test_folder = r"C:\Users\user\Downloads\Telegram Desktop\a"
     result_files = len(os.listdir(test_folder))
     
     # Browse a folder

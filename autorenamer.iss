@@ -2,10 +2,10 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Autorenamer"
-#define MyAppVersion "1.0.1"
+#define MyAppVersion "1.2.0"
 #define MyAppPublisher "Melvins Corp"
 #define MyAppURL "https://www.melvinsbro.com/"
-#define MyAppExeName "Autorenamer 6.exe"
+#define MyAppExeName "Autorenamer.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -20,14 +20,14 @@ AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
-LicenseFile=G:\3D Objects\Autorenamer\dist\LICENSE.txt
+LicenseFile=G:\3D Objects\Python Works\Autorenamer\dist\LICENSE.txt
 ;InfoBeforeFile=G:\3D Objects\PySide2 Template\dist\Informations before install.txt
 ;InfoAfterFile=G:\3D Objects\PySide2 Template\dist\Informations before install.txt
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-OutputDir=G:\3D Objects\Autorenamer
-OutputBaseFilename=Autorenamer_WINDOWS_x64_1.0.1
-SetupIconFile=G:\3D Objects\Autorenamer\icon.ico
+OutputDir=G:\3D Objects\Python Works\Autorenamer
+OutputBaseFilename=Autorenamer_WINDOWS_x64_1.2.0
+SetupIconFile=G:\3D Objects\Python Works\Autorenamer\icon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -39,10 +39,10 @@ Name: "french"; MessagesFile: "compiler:Languages\French.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "G:\3D Objects\Autorenamer\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "G:\3D Objects\Autorenamer\dist\images\*"; DestDir: "{app}/images"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "G:\3D Objects\Autorenamer\dist\fonts\*"; DestDir: "{app}/fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "G:\3D Objects\Autorenamer\dist\style.qss"; DestDir: "{app}"; Flags: ignoreversion
+Source: "G:\3D Objects\Python Works\Autorenamer\dist\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "G:\3D Objects\Python Works\Autorenamer\dist\images\*"; DestDir: "{app}/images"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "G:\3D Objects\Python Works\Autorenamer\dist\fonts\*"; DestDir: "{app}/fonts"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "G:\3D Objects\Python Works\Autorenamer\dist\style.qss"; DestDir: "{app}"; Flags: ignoreversion
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

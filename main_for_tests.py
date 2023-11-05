@@ -109,6 +109,7 @@ def main():
     })
     window.__setattr__("userActions", [])
     window.__setattr__("undoActions", [])
+    window.__setattr__("previousPathFolders", [])
     window.__setattr__("filesPreviousNames", [])
     window.__setattr__("filesPreviousObjects", [])
     window.__setattr__("filesPreviousOriginalsNames", [])
@@ -118,11 +119,13 @@ def main():
     window.__setattr__("categoriesNamesInputs", [])
     window.__setattr__("categoryInputs", [])
     window.__setattr__("canCreateNewFolder", [])
+    window.__setattr__("canDivideBySeason", [])
     # window.__setattr__("originalsCanCreateNewFolder", [])
     window.__setattr__("previousCanCreateNewFolder", [])
     # window.__setattr__("categoryInputsLabels", [])
     window.__setattr__("categoriesStatus", [])
     window.__setattr__("undoIndex", -1)
+    window.__setattr__("indexToaster", 0)
     window.__setattr__("hadShownAll", False)
     window.__setattr__("indexStartRename", -1)
     
@@ -166,6 +169,7 @@ def main():
                 "filesOriginalsNames" : window.filesOriginalsNames.copy(),
                 "filesOriginalsObjects" : copy.deepcopy(window.filesOriginalsObjects),
                 "canCreateNewFolder" : window.canCreateNewFolder.copy(),
+                "canDivideBySeason" : window.canDivideBySeason.copy(),
                 "categoriesNamesInputs" : window.categoriesNamesInputs.copy(),
                 "categoriesStatus" : window.categoriesStatus.copy(),
             } ))
@@ -176,11 +180,15 @@ def main():
         window.filesOriginalsNames = window.filesNames.copy()
         window.filesOriginalsObjects = copy.deepcopy(window.filesObjects)
         window.canCreateNewFolder = [ False for i in files_names ]
+        window.canDivideBySeason = [ False for i in files_names ]
         window.categoriesNamesInputs = [ QLineEdit(i) for i in files_names ]
         window.categoriesStatus = [ CategoriesStatus.NOT_TREATED.value for i in files_names ]
         # window.originalsCanCreateNewFolder = [ False for i in files_names ]
         
-        show_categories(files_names, files_sorted)   
+        if len(window.filesObjects) != 0 :
+            show_categories(files_names, files_sorted)
+        else :
+            gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, "loadSpinner"))   
         # print(gf.get_name_from_object(files_sorted[0][0]))
         # print( gf.get_episode_object(gf.get_name_from_object(files_sorted[0][0])) )
         return files_sorted
@@ -204,8 +212,10 @@ def main():
         window.__getattribute__(f"compilerThread{_index}").start()
 
     def toast_ok(_index : int, _message : str) :
-        
+        return
         # Init worker, thread and label
+        _index = window.indexToaster
+        window.indexToaster += 1
         window.__setattr__(f"okThread{_index}", QThread())
         window.__setattr__(f"okWorker{_index}", TimerWorker( lambda i=_index : None, 0, 2 ))
         window.__setattr__(f"okLabel{_index}", gf.load_py("renamer"))
@@ -224,6 +234,30 @@ def main():
         
         # Start the thread
         window.__getattribute__(f"okThread{_index}").start()
+        
+    def toast_error(_index : int, _message : str) :
+        return
+        # Init worker, thread and label
+        _index = window.indexToaster
+        window.indexToaster += 1
+        window.__setattr__(f"errorThread{_index}", QThread())
+        window.__setattr__(f"errorWorker{_index}", TimerWorker( lambda i=_index : None, 0, 2 ))
+        window.__setattr__(f"errorLabel{_index}", gf.load_py("renamer"))
+        
+        window.__getattribute__(f"errorLabel{_index}").m_ui.errorMessage.setObjectName(f"errorMessage{_index}")
+        window.__getattribute__(f"errorLabel{_index}").m_ui.errorLabel.setText(_message)
+        
+        # Connect worker to thread and other relative signals
+        window.__getattribute__(f"errorWorker{_index}").moveToThread(window.__getattribute__(f"errorThread{_index}")) 
+        window.__getattribute__(f"errorWorker{_index}").runnerSignal.connect(lambda i=_index : window.m_ui.statusbar.addWidget(window.__getattribute__(f"errorLabel{_index}").m_ui.errorMessage) )
+        window.__getattribute__(f"errorThread{_index}").started.connect(window.__getattribute__(f"errorWorker{_index}").run)
+        window.__getattribute__(f"errorWorker{_index}").finished.connect(lambda : gf.remove_from_status_bar(window.m_ui.statusbar, window.m_ui.statusbar.findChild(QWidget, f"errorMessage{_index}")))
+        window.__getattribute__(f"errorWorker{_index}").finished.connect(window.__getattribute__(f"errorThread{_index}").quit)
+        window.__getattribute__(f"errorWorker{_index}").finished.connect(window.__getattribute__(f"errorWorker{_index}").deleteLater)
+        window.__getattribute__(f"errorThread{_index}").finished.connect(window.__getattribute__(f"errorThread{_index}").deleteLater)
+        
+        # Start the thread
+        window.__getattribute__(f"errorThread{_index}").start()
         
     def show_categories(_files_names: list[str], _files_sorted: list[list[dict]]) :
         """Show in the GUI the sorted files
@@ -285,7 +319,6 @@ def main():
         window.__getattribute__(f'category{_index}').m_ui.categoryLayout.addLayout(window.__getattribute__(f'categoryLayout{_index}'))
         # window.__getattribute__(f"category{_index}").m_ui.category.setText(window.filesNames[_index])
         window.m_ui.scrollLayout.addWidget(window.__getattribute__(f'category{_index}').m_ui.categoryGroup)
-        # print( "In show categories ", _index, window.m_ui.scrollLayout.itemAt(_index) )    
         
     def insert_category(_index : int) :
         """Insert the category to the index 
@@ -314,19 +347,27 @@ def main():
         window.__getattribute__(f"category{_index}").m_ui.category.setText(window.filesNames[_index])
         window.m_ui.scrollLayout.insertWidget(_index, window.__getattribute__(f'category{_index}').m_ui.categoryGroup)
         
-    def refresh_category(_index : int) :
+    def refresh_category(_index : int, _last_datas : list[dict] = None) :
         """Refresh a category
 
         Args:
             _index (int): The index of the category to show
+            _last_datas (list[dict]): The previous datas of the files objects
         """
         # window.__setattr__(f"category{_index}", gf.load_py("renamer"))
         # gf.c
         # print(window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").children())
-        print("In refresh category ", window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChildren(QWidget, QRegExp(r"^inputContainer\d+$")) )
+        
+        # Clear the layout of the category
         gf.clear_layout(window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QVBoxLayout,"categoryLayout"))
-        [ window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, f"inputContainer{j}").deleteLater() for j in range(len(window.userActions[-1].datas["filesObjects"][_index])) ]
-        [ window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, f"inputContainer{j}").setParent(None) for j in range(len(window.userActions[-1].datas["filesObjects"][_index])) ]
+        
+        # Delete the category container
+        window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, "categoryContainer").deleteLater()
+        window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, "categoryContainer").setParent(None)
+        
+        # Delete all the previous input containers
+        [ window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, f"inputContainer{j}").deleteLater() for j in range(len( window.userActions[-1].datas["filesObjects"][_index] if _last_datas == None else _last_datas )) ]
+        [ window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"categoryEntity").findChild(QWidget, f"inputContainer{j}").setParent(None) for j in range(len( window.userActions[-1].datas["filesObjects"][_index] if _last_datas == None else _last_datas )) ]
         # return
         window.__setattr__(f"categoryLayout{_index}", QVBoxLayout())
         window.__getattribute__(f"categoryLayout{_index}").setObjectName(f"categoryLayout{_index}")
@@ -363,11 +404,11 @@ def main():
         """
         window.__getattribute__(_list)[_first_index][_second_index] = _value
         
-    def set_in_2D_dict(_list: list, _first_index : int, _second_index : int, _key : any, _value : any) :
+    def set_in_2D_dict(_list: str, _first_index : int, _second_index : int, _key : any, _value : any) :
         """Set the value at the index in a specific 2D list of dictionaries of window
 
         Args:
-            _list (list): The name of the list in window
+            _list (str): The name of the list in window
             _first_index (int): The first index in the first dimension
             _second_index (int): The second index in the second dimension
             _key (any): The key to set
@@ -396,6 +437,47 @@ def main():
         # Updating new datas
         window.canCreateNewFolder[_index] = _bool
         
+    def should_divide_by_seasons(_bool: bool, _index: int) :
+        
+        # Updating new datas
+        window.canDivideBySeason[_index] = _bool
+        
+    def divide_by_seasons(_first_index: int, _second_index: int) :
+        """Divide the files by seasons 
+
+        Args:
+            _first_index (int): The first index of the file's object
+            _second_index (int): The second index of the file's object
+        """        
+        
+        season = "S" + f"{window.filesObjects[_first_index][_second_index]['season']:02}"
+            
+        # Test if the season's folder is already created
+        if not os.path.exists(os.path.join(window.pathFolder, season)) :
+            os.makedirs(os.path.join(window.pathFolder, season))
+        
+        # Rename the original file to the compiled name
+        os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_first_index][_second_index]["original"]), os.path.join(window.pathFolder, season, window.filesObjects[_first_index][_second_index]["final"]) )
+        
+    def create_and_divide_by_seasons(_first_index: int, _second_index: int) :
+        """Create a new folder and divide it by season
+
+        Args:
+            _first_index (int): The first index of the file object
+            _second_index (int): The second index of the file object
+        """
+        season = "S" + f"{window.filesObjects[_first_index][_second_index]['season']:02}"
+        # Test if the englobing folder is already created    
+        if not os.path.exists(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0])) :
+            os.makedirs(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0]))
+            
+        # Test if the season's folder is already created
+        if not os.path.exists(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0], season)) :
+            os.makedirs(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0], season))
+        
+        # Rename the original file to the compiled name
+        os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_first_index][_second_index]["original"]), os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0], season, window.filesObjects[_first_index][_second_index]["final"]) )
+        
     def create_new_folder(_first_index : int, _second_index : int) :
         """Create a new folder and paste a file in
 
@@ -403,9 +485,10 @@ def main():
             _first_index (int): The first index of the file object
             _second_index (int): The second index of the file object
         """ 
-        if not os.path.exists(os.path.join(window.pathFolder, window.filesNames[_first_index])) :
-            os.makedirs(os.path.join(window.pathFolder, window.filesNames[_first_index]))
-        os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_first_index][_second_index]["original"]), os.path.join(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0]), window.filesObjects[_first_index][_second_index]["final"]) )
+         
+        if not os.path.exists(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0])) :
+            os.makedirs(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0]))
+        os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_first_index][_second_index]["original"]), os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_first_index])[0], window.filesObjects[_first_index][_second_index]["final"]) )
         
     def recolor_category(_index : int, _color : str = "GREEN") :
         
@@ -421,11 +504,14 @@ def main():
         window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"refresh").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"refresh").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[1]};" )
         window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"renameAll").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"renameAll").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[1]};" )
         window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"fuseWith").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"fuseWith").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[1]};" )
+        window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"renameInAscendingOrder").setStyleSheet( window.m_ui.scrollLayout.itemAt(_index).widget().findChild(QWidget,"renameInAscendingOrder").styleSheet() + f"background-color : {CategoriesColors[_color.upper()].value[1]};" )
         
     def rename_all_categories() :
         window.indexStartRename = -1
         window.undoActions.clear()
-        window.userActions.append(Action.Action(Action.TypeActions["RENAME_ALL_CATEGORIES"], -1, None, window.categoriesStatus.copy()))
+        window.userActions.append(Action.Action(Action.TypeActions["RENAME_ALL_CATEGORIES"], -1, None, { "categoriesStatus" : window.categoriesStatus.copy(),
+          "canDivideBySeason" : window.canDivideBySeason.copy(),
+          "canCreateNewFolder" : window.canCreateNewFolder.copy() }))
         [ rename_all(i, True) for i in range(len(window.filesNames)) ]
         
     def rename_all(_index : int, _concern_all : bool = False) :
@@ -437,65 +523,130 @@ def main():
         # Saving previous datas and the first index to rename
         if not _concern_all :
             window.undoActions.clear()
-            if not window.canCreateNewFolder[_index] :
+            if window.canCreateNewFolder[_index] and window.canDivideBySeason[_index] :
                 window.undoIndex = -1
-                window.userActions.append(Action.Action(Action.TypeActions["RENAME_ALL"], _index, None, window.categoriesStatus.copy()))
+                window.userActions.append(Action.Action(Action.TypeActions["CREATE_AND_DIVIDE_BY_SEASONS"], _index, window.filesNames[_index], { "categoriesStatus" : window.categoriesStatus.copy() }))
+            elif window.canDivideBySeason[_index] :
+                window.undoIndex = -1
+                window.userActions.append(Action.Action(Action.TypeActions["DIVIDE_BY_SEASONS"], _index, window.filesNames[_index], { "categoriesStatus" : window.categoriesStatus.copy() }))
+            elif window.canCreateNewFolder[_index] :
+                window.undoIndex = -1
+                window.userActions.append(Action.Action(Action.TypeActions["CREATE_NEW_FOLDER"], _index, window.filesNames[_index], { "categoriesStatus" : window.categoriesStatus.copy() }))
             else :
                 window.undoIndex = -1
-                window.userActions.append(Action.Action(Action.TypeActions["CREATE_NEW_FOLDER"], _index, window.filesNames[_index], window.categoriesStatus.copy()))
+                window.userActions.append(Action.Action(Action.TypeActions["RENAME_ALL"], _index, None, { "categoriesStatus" : window.categoriesStatus.copy() }))
         elif window.indexStartRename == -1 :
             window.indexStartRename = _index
         
-        [ os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder, window.filesObjects[_index][j]["final"]) ) if not window.canCreateNewFolder[_index] else create_new_folder(_index, j) for j in range(len(window.filesObjects[_index])) ]
+        # Do the divide by seasons treatment
+        
+        [ create_and_divide_by_seasons(_index, j) if window.canCreateNewFolder[_index] and window.canDivideBySeason[_index] else
+         divide_by_seasons(_index, j) if window.canDivideBySeason[_index] else
+         create_new_folder(_index, j) if window.canCreateNewFolder[_index] 
+         else os.rename( os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]), os.path.join(window.pathFolder, window.filesObjects[_index][j]["final"]) ) 
+         for j in range(len(window.filesObjects[_index])) ]
         window.categoriesStatus[_index] = CategoriesStatus.TREATED.value
         recolor_category(_index)
-        # if window.indexStartRename == _index and _concern_all :
-            # toast_ok(_index, f"Toutes catégories renommées !")
-        # elif not _concern_all :
-            # toast_ok(_index, f"Renommé avec succès !")
+        if window.indexStartRename == _index and _concern_all :
+            toast_ok(_index, f"Toutes catégories renommées !")
+        elif not _concern_all :
+            toast_ok(_index, f"Renommé avec succès !")
         # toast_ok(_index, f"{window.filesNames[_index]} renommée avec succès !")
         
     def undo_rename_all_categories() :
-        window.categoriesStatus = window.userActions[-1].datas
+        # Régler le problème des rename all undo
+        window.categoriesStatus = window.userActions[-1].datas["categoriesStatus"]
+        season = lambda _index, _second_index : "S" + f"{window.filesObjects[_index][_second_index]['season']:02}"
+        
         [ 
-         [ os.rename( os.path.join(window.pathFolder, window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) 
-          ] if not window.canCreateNewFolder[i] else (
-              [ os.rename( os.path.join(os.path.join(window.pathFolder, window.filesNames[i]), window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) ] if os.path.exists(os.path.join(window.pathFolder, window.filesNames[i])) else None
-              ) for i in range(len(window.filesNames)) if window.categoriesStatus[i] != CategoriesStatus.TREATED.value ]
+         # Test if both canCreateNewFolder and canDivideBySeason 's checkboxes are checked
+         (
+        [ os.rename( os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[i])[0], season(i, j), window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) ]
+        if not False in [ os.path.exists(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[i])[0], season(i, j))) for j in range(len(window.filesObjects[i])) ] else None
+        ) if window.userActions[-1].datas["canCreateNewFolder"][i] and window.userActions[-1].datas["canDivideBySeason"][i] else
+         
+         # Else test if canDivideBySeason's checkboxe is checked
+         (
+        [ os.rename( os.path.join(window.pathFolder, season(i,j), window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) ]
+        if not False in [ os.path.exists(os.path.join(window.pathFolder, season(i, j))) for j in range(len(window.filesObjects[i])) ] else None
+        ) if window.userActions[-1].datas["canDivideBySeason"][i] else
+         
+         # Else test if canCreateNewFolder's checkboxe is checked
+         (
+        [ os.rename( os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[i])[0], window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) ]
+        if os.path.exists(os.path.join(window.pathFolder, window.filesNames[i])) else None
+        ) if window.userActions[-1].datas["canCreateNewFolder"][i] else
+         
+         # Else do the normal renaming
+        [ os.rename( os.path.join(window.pathFolder, window.filesObjects[i][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[i][j]["original"]) ) for j in range(len(window.filesObjects[i])) ]  
+         
+         # Take only indices where the previous categoriesStatus are not treated so that the actual are treated
+        for i in range(len(window.filesNames)) if window.categoriesStatus[i] != CategoriesStatus.TREATED.value ]
+        
         [ recolor_category(i, "GRAY") for i in range(len(window.filesNames)) if window.categoriesStatus[i] != CategoriesStatus.TREATED.value ]
         
     def undo_rename_all() :
         """Undo the action rename all
         """        
-        _index = window.userActions[window.undoIndex].concernIndex
+        _index = window.userActions[-1].concernIndex
         [ os.rename( os.path.join(window.pathFolder, window.filesObjects[_index][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]) ) for j in range(len(window.filesObjects[_index])) ]
-        window.categoriesStatus[_index] = window.userActions[-1].datas[_index]
+        window.categoriesStatus[_index] = window.userActions[-1].datas["categoriesStatus"][_index]
         recolor_category(_index, "GRAY")
         
     def undo_create_new_folder() :
         """Undo the action create new folder and rename all
         """        
-        _index = window.userActions[window.undoIndex].concernIndex
-        if not os.path.exists(os.path.join(window.pathFolder, window.filesNames[_index])) :
+        _index = window.userActions[-1].concernIndex
+        if not os.path.exists(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_index])[0])) :
             return
-        [ os.rename( os.path.join(os.path.join(window.pathFolder, window.filesNames[_index]), window.filesObjects[_index][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]) ) for j in range(len(window.filesObjects[_index])) ]
-        window.categoriesStatus[_index] = window.userActions[-1].datas[_index]
+        [ os.rename( os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_index])[0], window.filesObjects[_index][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]) ) for j in range(len(window.filesObjects[_index])) ]
+        window.categoriesStatus[_index] = window.userActions[-1].datas["categoriesStatus"][_index]
+        recolor_category(_index, "GRAY")
+        
+    def undo_create_and_divide_by_seasons() :
+        _index = window.userActions[-1].concernIndex
+        season = lambda _second_index : "S" + f"{window.filesObjects[_index][_second_index]['season']:02}"
+        
+        if False in [ os.path.exists(os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_index])[0], season(j))) for j in range(len(window.filesObjects[_index])) ] :
+            return
+        [ os.rename( os.path.join(window.pathFolder, gf.escape_behind_with_pattern(r'\s*$', window.filesNames[_index])[0], season(j), window.filesObjects[_index][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]) ) for j in range(len(window.filesObjects[_index])) ]
+        window.categoriesStatus[_index] = window.userActions[-1].datas["categoriesStatus"][_index]
+        recolor_category(_index, "GRAY")
+        
+    def undo_divide_by_seasons() :
+        """Undo the action divide by seasons
+        """        
+        _index = window.userActions[-1].concernIndex
+        season = lambda _second_index : "S" + f"{window.filesObjects[_index][_second_index]['season']:02}"
+        
+        if False in [ os.path.exists(os.path.join(window.pathFolder, season(j))) for j in range(len(window.filesObjects[_index])) ] :
+            return
+        [ os.rename( os.path.join(window.pathFolder, season(j), window.filesObjects[_index][j]["final"]), os.path.join(window.pathFolder, window.filesOriginalsObjects[_index][j]["original"]) ) for j in range(len(window.filesObjects[_index])) ]
+        window.categoriesStatus[_index] = window.userActions[-1].datas["categoriesStatus"][_index]
         recolor_category(_index, "GRAY")
         
     def connect_all_widgets():
         """Connect all the widgets of the scrollLayout
         """        
-        # QLineEdit.textChanged.
+        # Connect the categories' names inputs to our state
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"category").textChanged, lambda _=0, i=i : window.categoriesNamesInputs[i].setText(_) ) for i in range(len(window.filesNames)) ]
         
-        # .m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").
-        # QWidget.fi
-        # [  [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").textChanged, lambda _=0, i=i : set_in_2D_dict("filesObjects", i, j, "final", _) ) for j in range(len(window.filesObjects[i])) ] for i in range(len(window.filesNames))  ]
+        # Connect the editingFinished signal of categories' names inputs to the click of the refresh button of the category
+        [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"category").editingFinished, lambda _=0, i=i : window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"refresh").animateClick() ) for i in range(len(window.filesNames)) ]
         
+        # Connect the categories' items inputs to our state
+        [  [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").textChanged, lambda _=0, i=i, j=j : set_in_2D_dict("filesObjects", i, j, "final", _) ) for j in range(len(window.filesObjects[i])) ] for i in range(len(window.filesNames))  ]
+        
+        # Connect the returnPressed of each category item input to the focus of the next
+        [  [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j}").findChild(QWidget, "inputName").returnPressed, lambda _=0, i=i, j=j : window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget, "categoryEntity").findChild(QWidget, f"inputContainer{j+1}").findChild(QWidget, "inputName").setFocus() if j+1 < len(window.filesObjects[i]) else None ) for j in range(len(window.filesObjects[i])) ] for i in range(len(window.filesNames))  ]
+        
+        # Connect each category button to his function
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"refresh").clicked, lambda _=0, i=i : refresh_data(i)) for i in range(len(window.filesNames)) ]
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"renameAll").clicked, lambda _=0, i=i : rename_all(i)) for i in range(len(window.filesNames)) ]
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"fuseWith").clicked, lambda _=0, i=i : fuse_with(i)) for i in range(len(window.filesNames)) ]
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"createNewFolder").toggled, lambda _, i=i : should_create_new_folder(_,i)) for i in range(len(window.filesNames)) ]
+        [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"divideBySeasons").toggled, lambda _, i=i : should_divide_by_seasons(_,i)) for i in range(len(window.filesNames)) ]
+        [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"renameInAscendingOrder").clicked, lambda _=0, i=i : rename_in_ascending_order(i)) for i in range(len(window.filesNames)) ]
         [ gf.reconnect(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChild(QWidget,"categoryContainer").findChild(QWidget,"close").clicked, lambda _=0, i=i : close_group(i)) for i in range(len(window.filesNames)) ]
                 
     def set_in_dict(_dict : list[dict], _key : str, _value : any) :
@@ -517,7 +668,7 @@ def main():
         """
         if _where == None :
             # print(_where, _who)
-            # window.fuser.close()
+            window.fuser.close()
             return
         # print(_where, _who)
         
@@ -539,14 +690,14 @@ def main():
         window.filesObjects[_where] = sorted(window.filesObjects[_where], key=itemgetter('episode'))
         window.filesOriginalsObjects[_where].extend(window.filesOriginalsObjects[_who])        
         window.filesOriginalsObjects[_where] = sorted(window.filesOriginalsObjects[_where], key=itemgetter('episode'))
-        # res = []
-        # [ res.append(x) for x in window.filesOriginalsObjects[_where] if x not in res ]
-        # window.filesOriginalsObjects[_where] = res.copy()
+        res = []
+        [ res.append(x) for x in window.filesOriginalsObjects[_where] if x not in res ]
+        window.filesOriginalsObjects[_where] = res.copy()
 
         # Finish with the remaining tasks
         refresh_category(_where)
         close_group(_who, True)
-        # window.fuser.close()
+        window.fuser.close()
                 
     def fuse_with(_index : int) :
         """Open a popup widget to pick a category to fuse the given one in
@@ -554,6 +705,9 @@ def main():
         Args:
             _index (int): The index of the category to fuse in another
         """        
+        if len(window.filesNames) == 1 :
+            toast_error(_index, "Nombre de catégories insuffisant")
+            return
         window.__setattr__('fuser', gf.load_py('fuser_dialog'))
         fontDatabase = QFontDatabase()
         fontDatabase.addApplicationFont(resource_path("fonts\\inder.ttf"))
@@ -568,7 +722,7 @@ def main():
                 window.__getattribute__(f"fuser{i}").m_ui.categoryRadio.toggled.connect(lambda _, i=i : radios.append( i ) if _ == True else None) # set_in_dict(radios, window.filesNames[i], _)) # print(window.filesNames[i], _))
                 window.fuser.m_ui.scrollLayout.addWidget(window.__getattribute__(f"fuser{i}").m_ui.categoryRadio)
         window.fuser.m_ui.ok.clicked.connect(lambda _='t' : fuse_categories(radios[-1] if len(radios) != 0 else None, _index))
-        # window.fuser.exec_()
+        window.fuser.exec_()
         # window.fuser.show()
         
     def close_group(_index : int, isFusing : bool = False) :
@@ -616,12 +770,28 @@ def main():
         # Remove it from layout
         gf.remove_from_layout(window.m_ui.scrollLayout, _index)
         if len(window.filesObjects) == 0 :
-            print("Yes")
+            # print("Yes")
             window.__setattr__("emptySearch", gf.load_py("renamer"))
             window.emptySearch.m_ui.noFileFound.setText("Toutes les catégories sont fermées. Annulez votre dernière action ou parcourez un autre dossier pour en afficher")
             window.m_ui.scrollLayout.addWidget(window.emptySearch.m_ui.emptySearch)
         
         # Reconnect all widgets
+        connect_all_widgets()
+        
+    def rename_in_ascending_order(_index: int) :
+        """Rename a category in the ascending order
+
+        Args:
+            _index (int): The index of the category
+        """
+        window.undoActions.clear()
+        window.undoIndex = -1
+        window.userActions.append(Action.Action(Action.TypeActions["RENAME_IN_ASCENDING_ORDER"], _index, None, {
+            "filesObjects" : copy.deepcopy(window.filesObjects[_index]),
+        }))
+        [ set_in_2D_dict("filesObjects", _index, j, "episode", j+1) for j in range(len(window.filesObjects[_index])) ]
+        [ set_in_2D_dict("filesObjects", _index, j, "final", gf.get_name_from_object(window.filesObjects[_index][j])) for j in range(len(window.filesObjects[_index])) ]
+        refresh_category(_index, window.userActions[-1].datas["filesObjects"])
         connect_all_widgets()
         
     def undo() :
@@ -674,6 +844,16 @@ def main():
                 show_categories(window.filesNames, window.filesObjects)
             case "RENAME_ALL_CATEGORIES" :
                 undo_rename_all_categories()
+            case "RENAME_IN_ASCENDING_ORDER" :
+                window.filesObjects[window.userActions[-1].concernIndex] = window.userActions[-1].datas["filesObjects"]
+                refresh_category(window.userActions[-1].concernIndex)
+                # window.m_ui.scrollLayout.itemAt(window.userActions[-1].concernIndex).widget().findChild(QWidget,"renameInAscendingOrder").animateClick()
+                # QCheckBox.isChecked
+                connect_all_widgets()
+            case "DIVIDE_BY_SEASONS" :
+                undo_divide_by_seasons()
+            case "CREATE_AND_DIVIDE_BY_SEASONS" :
+                undo_create_and_divide_by_seasons()
             
         window.undoActions.append(window.userActions[-1])
         del window.userActions[-1]
@@ -692,11 +872,32 @@ def main():
             case "FUSE_WITH" :
                 fuse_categories(window.undoActions[-1].concernValue, window.undoActions[-1].concernIndex)
             case "CREATE_NEW_FOLDER" :
+                window.undoIndex = -1
+                window.userActions.append(Action.Action(Action.TypeActions["CREATE_NEW_FOLDER"], window.undoActions[-1].concernIndex, window.filesNames[window.undoActions[-1].concernIndex], { "categoriesStatus" : window.categoriesStatus.copy()}))
                 [ create_new_folder(window.undoActions[-1].concernIndex, j) for j in range(len(window.filesObjects[window.undoActions[-1].concernIndex])) ]
+                window.categoriesStatus[window.undoActions[-1].concernIndex] = CategoriesStatus.TREATED.value
+                recolor_category(window.undoActions[-1].concernIndex)
+                toast_ok(window.undoActions[-1].concernIndex, f"Renommé avec succès !")
             case "BROWSE" :
                 compileFiles(window.m_ui.folderNameEdit.text())
             case "RENAME_ALL_CATEGORIES" :
                 rename_all_categories()
+            case "RENAME_IN_ASCENDING_ORDER" :
+                rename_in_ascending_order(window.userActions[-1].concernIndex)
+            case "DIVIDE_BY_SEASONS" :
+                window.undoIndex = -1
+                window.userActions.append(Action.Action(Action.TypeActions["DIVIDE_BY_SEASONS"], window.undoActions[-1].concernIndex, window.filesNames[window.undoActions[-1].concernIndex], { "categoriesStatus" : window.categoriesStatus.copy()}))
+                [ divide_by_seasons(window.undoActions[-1].concernIndex, j) for j in range(len(window.filesObjects[window.undoActions[-1].concernIndex])) ]
+                window.categoriesStatus[window.undoActions[-1].concernIndex] = CategoriesStatus.TREATED.value
+                recolor_category(window.undoActions[-1].concernIndex)
+                toast_ok(window.undoActions[-1].concernIndex, f"Renommé avec succès !")
+            case "CREATE_AND_DIVIDE_BY_SEASONS" :
+                window.undoIndex = -1
+                window.userActions.append(Action.Action(Action.TypeActions["CREATE_AND_DIVIDE_BY_SEASONS"], window.undoActions[-1].concernIndex, window.filesNames[window.undoActions[-1].concernIndex], { "categoriesStatus" : window.categoriesStatus.copy()}))
+                [ create_and_divide_by_seasons(window.undoActions[-1].concernIndex, j) for j in range(len(window.filesObjects[window.undoActions[-1].concernIndex])) ]
+                window.categoriesStatus[window.undoActions[-1].concernIndex] = CategoriesStatus.TREATED.value
+                recolor_category(window.undoActions[-1].concernIndex)
+                toast_ok(window.undoActions[-1].concernIndex, f"Renommé avec succès !")
         
         window.undoActions = previousUndoActions.copy()
         del window.undoActions[-1]
@@ -711,11 +912,6 @@ def main():
         Args:
             _index (int): The index of the category in the whole list
         """        
-        # print( [ window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").children() for i in range(len(window.filesObjects)) ] )
-        # print( [ len(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChildren(QWidget, QRegExp("^inputContainer\d+$"))) for i in range(len(window.filesObjects)) ] )
-        # QLayout.
-        # print( [ len(window.m_ui.scrollLayout.itemAt(i).widget().findChild(QWidget,"categoryEntity").findChildren(QWidget, "inputContainer")) for i in range(len(window.filesObjects)) ] )
-        # print("In refresh_data", window.categoriesNamesInputs[_index].text() )
         if window.filesNames[_index] != window.categoriesNamesInputs[_index].text() :
             # Saving the action
             window.undoActions.clear()
@@ -754,23 +950,33 @@ def main():
         Returns:
             str: The path of the folder
         """
-        # print("It was", pathFolder)
-        # QFileDialog.getExistingDirectory()
-        if not os.path.exists( rf'{window.m_ui.folderNameEdit.text()}' ) :
+        canCompile = True
+        # Check if the actual pathFolder exists or is already used
+        if not os.path.exists( rf'{window.m_ui.folderNameEdit.text()}' ) or ( window.previousPathFolders[-1] == window.m_ui.folderNameEdit.text() if len(window.previousPathFolders) != 0 else False ) :
             pathFolder = QFileDialog.getExistingDirectory(None, gc.FILE_DIALOG_CAPTION, 
                                                         "C:/Users/user/Downloads/Telegram Desktop")
                                                         #   os.path.join( pathToMyDocuments ))
             window.m_ui.folderNameEdit.setText(pathFolder)
-        pathFolder = rf'{window.m_ui.folderNameEdit.text()}'
-        print("It is", window.m_ui.folderNameEdit.text())
-        if pathFolder != "" :
+            window.previousPathFolders.append(pathFolder)
+            canCompile = pathFolder != ""
+        
+        if canCompile :
+            # Get the actual pathFolder and actualise the list of previouspathFolders
+            pathFolder = rf'{window.m_ui.folderNameEdit.text()}'
+            if window.previousPathFolders[-1] != pathFolder if len(window.previousPathFolders) != 0 else False :
+                window.previousPathFolders.append(pathFolder)
+            print("It is", window.m_ui.folderNameEdit.text())
+           
             # Add a loader to the status bar
             window.__setattr__("loader", QMovie(":/loadSpinner/images/rollingSpinner.gif"))
             window.renamer.m_ui.loader.setMovie(window.loader) 
             window.loader.start()
             window.m_ui.statusbar.addWidget(window.renamer.m_ui.loadSpinner)
+           
+            # Compile with the actual pathFolder
             compileFiles(window.m_ui.folderNameEdit.text())
-        return pathFolder        
+            
+            return pathFolder        
     
     def goToPage(page : str) :
         """Go to the specified page
@@ -786,6 +992,7 @@ def main():
     # Create pages and load ui files in it
     window.__setattr__("renamer", gf.load_py("renamer"))
     window.__setattr__("scroll_item", get_scroll_item)
+    # window.__setattr__('fuser', gf.load_py('fuser_dialog'))
     window.m_ui.parcourirButton.clicked.connect(lambda : get_folder())
     window.m_ui.renameAllCategoriesButton.clicked.connect(lambda : rename_all_categories())
     window.m_ui.actionParcourir.triggered.connect(lambda : get_folder())
